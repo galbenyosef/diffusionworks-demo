@@ -1,0 +1,79 @@
+{
+  "start": "https://diffusionworks.com/web-demo",
+  "origin": "https://diffusionworks.com",
+  "gated": false,
+  "sessionRenewal": "none",
+  "requests": 26,
+  "fetched": 34,
+  "bytes": 38479123,
+  "paths": [
+    "_nuxt/A3EUxX58.js",
+    "_nuxt/B9hgXP_e.js",
+    "_nuxt/Buq_OoVt.js",
+    "_nuxt/bBm2T0bl.js",
+    "_nuxt/builds/latest.json",
+    "_nuxt/builds/meta/59b71471-88a1-4f73-ae77-d8743f470d65.json",
+    "_nuxt/c0TEtrJJ.js",
+    "_nuxt/entry.BnxCdEeO.css",
+    "_nuxt/inter-cyrillic-ext-wght-normal.BOeWTOD4.woff2",
+    "_nuxt/inter-cyrillic-wght-normal.DqGufNeO.woff2",
+    "_nuxt/inter-greek-ext-wght-normal.DlzME5K_.woff2",
+    "_nuxt/inter-greek-wght-normal.CkhJZR-_.woff2",
+    "_nuxt/inter-latin-ext-wght-normal.DO1Apj_S.woff2",
+    "_nuxt/inter-latin-wght-normal.Dx4kXJAl.woff2",
+    "_nuxt/inter-vietnamese-wght-normal.CBcvBZtf.woff2",
+    "_nuxt/l-4XETKm.js",
+    "asset-store/ultimate-water-2d-social-1200x630.png",
+    "brand/diffusionworks-logo-dark-v4.png",
+    "favicon.ico",
+    "favicon.png",
+    "images/ultimate-water-hero.png",
+    "unity-demo/Build/webBuild.data.unityweb",
+    "unity-demo/Build/webBuild.framework.js.unityweb",
+    "unity-demo/Build/webBuild.loader.js",
+    "unity-demo/Build/webBuild.wasm.unityweb",
+    "unity-demo/TemplateData/favicon.ico",
+    "unity-demo/TemplateData/fullscreen-button.png",
+    "unity-demo/TemplateData/progress-bar-empty-dark.png",
+    "unity-demo/TemplateData/progress-bar-full-dark.png",
+    "unity-demo/TemplateData/style.css",
+    "unity-demo/TemplateData/unity-logo-dark.png",
+    "unity-demo/TemplateData/unity-logo-title-footer.png",
+    "unity-demo/index.html",
+    "web-demo/index.html"
+  ],
+  "unresolved": [],
+  "unreachable": [
+    {
+      "status": 404,
+      "path": "web-demo/index.html",
+      "probes": 1,
+      "note": "the route is served bare at /web-demo; the filename 404s by design (the mirrored copy is kept at web-demo/index.html so a static server with directory indexes lands on it)."
+    },
+    {
+      "status": 404,
+      "path": "web-demo/_payload.json",
+      "probes": 1,
+      "note": "Nuxt payload endpoint not used by this page (SSR data is inlined in the entry document)."
+    },
+    {
+      "status": 404,
+      "path": "unity-demo/StreamingAssets",
+      "probes": 1,
+      "note": "the Unity build declares streamingAssetsUrl but the demo ships no StreamingAssets tree."
+    },
+    {
+      "status": 404,
+      "path": "unity-demo/Build/webBuild.loader.js.map",
+      "probes": 1,
+      "note": "no source map for the Unity loader."
+    },
+    {
+      "status": 404,
+      "path": "unity-demo/Build/webBuild.data",
+      "probes": 1,
+      "note": "the payload is served only in its .unityweb (gzip) form."
+    }
+  ],
+  "external": []
+}
