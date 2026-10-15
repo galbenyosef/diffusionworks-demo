@@ -334,10 +334,12 @@ section is entirely about `readable/`, `src/`, `split-spec.json`, `rename-map.js
   IIFE re-rooting guard (ag)/(ah) are carried: this capture is a flat module, so (ag)
   re-roots nothing and the `of`/`in` guard has no rule to fire on. The labeled-statement
   fix (aj) is present in the copied writer.
-- **Pipeline** `apply → recover → derive → gates`; the superseded pre-campaign
-  `readable/` + `src/` layers are archived under `legacy/2026-10-15/` (14 readable +
-  5 src + split-spec.json, 1.2 MB) — `rename-map.json`, `split-spec.json` and
-  `index-inline-map.json` regenerate in place (git is their history).
+- **Pipeline** `apply → recover → derive → gates`; the superseded pre-2026-10-15
+  `readable/` + `src/` layers (the flat, pre-campaign cut) are archived under
+  `legacy/2026-10-15/` (14 readable + 5 src + split-spec.json, 1.2 MB; archive-both
+  rule). The intermediate nested-unrenamed cut is in git history (commit `04ec11f`).
+  `rename-map.json`, `split-spec.json` and `index-inline-map.json` regenerate in
+  place (git is their history).
 - **Gates** (all green on 2026-10-15): `node tools/verify.mjs` → `34 files checked,
   0 problems`; `node tools/audit.js` → `AUDIT PASS` (20 spec sections — 5/5
   src↔pretty round-trips byte-exact **through the recorded rename map**, 1 renamed
