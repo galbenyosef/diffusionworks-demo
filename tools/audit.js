@@ -8,16 +8,17 @@
 // Derived pipeline this gate keeps honest:
 //
 //   capture *.js  (six Nuxt boot chunks + the Unity loader)
-//        -> readable/<tag>.pretty.js        (pinned prettier 3.9.6, single pass)
+//        -> readable/<served path>.pretty.js   (pinned prettier 3.9.6, single pass;
+//                                               served dirs mirrored, no __ flattening)
 //   capture *.css (entry CSS + Unity template stylesheet)
-//        -> readable/<tag>.pretty.css       (stylesheet rule)
+//        -> readable/<served path>.pretty.css  (stylesheet rule)
 //   unity-demo/Build/webBuild.framework.js.unityweb
-//        -> readable/…framework.js.pretty.js (gunzip IN MEMORY + prettier; vendor rule)
-//   demo glue (loader, /web-demo route component)
-//        -> src/<tag>-NN.js                 (statement-aligned slices; the loader's
-//                                            slices descend into the single
-//                                            createUnityInstance function body —
-//                                            recorded as slicingContext)
+//        -> readable/unity-demo/Build/…framework.js.pretty.js (gunzip IN MEMORY + prettier; vendor rule)
+//   demo glue (the Unity loader body, /web-demo route component)
+//        -> src/<served path>-NN.js            (statement-aligned slices; the loader's
+//                                               slices descend into the single
+//                                               createUnityInstance function body —
+//                                               recorded as slicingContext)
 //   site-shell machinery chunks -> split-spec wholeFile sections (never sliced)
 //   payloads/binary assets      -> split-spec notRendered (bytes + sha256)
 //   entry documents             -> inline-script scan (twins + index-inline-map.json;
@@ -31,9 +32,12 @@
 //      re-verified textually against their recorded firstLine/lastLine.
 //   3. The ranges of each sourceFile tile it exactly: first starts at line 1, each next
 //      starts at previous end + 1, last ends at EOF — no gaps, no overlaps.
-//   4. Byte-exact round-trip: every src slice minus its exact 2-line header
-//      (`// <tag> NN — <marker>` + `// Lines A-B of <pretty> (statement-aligned).`)
-//      equals its recorded sourceFile range byte for byte.
+//   4. Byte-exact round-trip through the rename layer: every src slice minus its exact
+//      2-line header (`// <tag> NN — <marker>` + `// Lines A-B of <pretty> (statement-aligned).`)
+//      equals its recorded sourceFile range with the recorded rename map applied
+//      (tools/engine/rename-layer.mjs applyRecordedMap). A slice that differs from its
+//      readable range while rename-map.json records no map for it is an unrecorded
+//      rename — a problem.
 //   5. Every slice parses standalone with the exact gate command
 //      `node --input-type=module --check -` (stdin), as does every readable *.pretty.js.
 //   6. src/*.js on disk and the spec's ranged slices are the same set — no unlisted or
@@ -62,26 +66,33 @@
 //      document must have its readable twin + a readable/index-inline-map.json entry
 //      whose byte range + sha256 match the capture bytes — except typed data blocks,
 //      which must be recorded as notRendered (range + sha256) instead.
-//  12. Derived layers never enter the capture sums: no readable/, src/, legacy/ or
-//      split-spec.json path may appear in .upstream/manifest.json.
+//  12. Derived layers never enter the capture sums: no readable/, src/, legacy/,
+//      split-spec.json, rename-map.json, index-inline-map.json or _mirror-report.json
+//      path may appear in .upstream/manifest.json.
+//  13. Rename-map honesty (the PLAN §5 campaign gate): rename-map.json parses; every
+//      recorded file is a ranged slice on disk; every scoped index addresses the
+//      recorded identifier token in that slice's readable range and is never an
+//      import/export specifier (foreign) position; every map target is a valid
+//      identifier and not the name itself; split-spec.json carries a `rename` block
+//      naming rename-map.json.
 //
 // usage: node tools/audit.js
-"use strict";
-const fs = require("node:fs");
-const path = require("node:path");
-const zlib = require("node:zlib");
-const crypto = require("node:crypto");
-const { spawnSync } = require("node:child_process");
-const { pathToFileURL } = require("node:url");
+import fs from "node:fs";
+import path from "node:path";
+import zlib from "node:zlib";
+import crypto from "node:crypto";
+import { spawnSync } from "node:child_process";
+import { pathToFileURL, fileURLToPath } from "node:url";
+import { applyRecordedMap, foreignNameIndices, tokens } from "./engine/rename-layer.mjs";
 
-const here = __dirname;
+const here = path.dirname(fileURLToPath(import.meta.url));
 const proj = path.resolve(here, "..");
 const srcDir = path.join(proj, "src");
 const readableDir = path.join(proj, "readable");
 const PINNED = "3.9.6";
 const ROOT = ""; // capture files sit at the repo root
 const FRAMEWORK_CAPTURE = "unity-demo/Build/webBuild.framework.js.unityweb";
-const FRAMEWORK_PRETTY = "readable/unity-demo__Build__webBuild.framework.js.pretty.js";
+const FRAMEWORK_PRETTY = "readable/unity-demo/Build/webBuild.framework.js.pretty.js";
 
 const problems = [];
 const problem = (msg) => problems.push(msg);
@@ -100,11 +111,13 @@ const getLines = (abs) => {
 };
 const sha256 = (buf) => crypto.createHash("sha256").update(buf).digest("hex");
 
-// capture-relative name -> readable twin name (dirs flattened with __)
+// capture-relative name -> readable twin name (served path mirrored: the capture
+// preserves the served URL structure, so the derived layers keep the served
+// subdirectories and filenames — no __ flattening)
 const prettyNameOf = (capRel) => {
   const rel = capRel.startsWith(ROOT) ? capRel.slice(ROOT.length) : capRel;
-  const flat = rel.replace(/\.(js|css)$/i, "").split("/").join("__");
-  return "readable/" + flat + (/\.css$/i.test(rel) ? ".pretty.css" : ".pretty.js");
+  const stem = rel.replace(/\.(js|css)$/i, "");
+  return "readable/" + stem + (/\.css$/i.test(rel) ? ".pretty.css" : ".pretty.js");
 };
 const captureByPretty = new Map(); // readable/<x>.pretty.js|css -> capture rel
 
@@ -291,7 +304,7 @@ if (!spec?.renderOptions || typeof spec.renderOptions !== "object")
 if (!Array.isArray(spec?.notRendered))
   problem("split-spec.json records no notRendered array (payload/binary records)");
 if (spec?.defaultFile) {
-  const df = path.join(srcDir, path.basename(String(spec.defaultFile)));
+  const df = path.join(proj, String(spec.defaultFile));
   if (!fs.existsSync(df)) problem(`split-spec defaultFile "${spec.defaultFile}" does not exist`);
 }
 if (spec?.slicingContext) {
@@ -300,6 +313,46 @@ if (spec?.slicingContext) {
     if (!sections.some((s) => s.skipped === true && String(s.file).endsWith(suffix)))
       problem(`slicingContext recorded but no skipped section ends in ${suffix}`);
 }
+if (!spec?.rename || typeof spec.rename !== "object") problem("split-spec.json records no rename block");
+else if (spec.rename.map !== "rename-map.json") problem(`split-spec rename.map is "${spec.rename.map}", expected "rename-map.json"`);
+
+// ── rename-map.json (the PLAN §5 campaign record this gate re-proves) ────
+const renameMapPath = path.join(proj, "rename-map.json");
+let renameMap = { files: {}, scoped: {} };
+const renameSlices = new Set();
+let flatRecorded = 0,
+  scopedRecorded = 0;
+if (fs.existsSync(renameMapPath)) {
+  try {
+    const rm = JSON.parse(fs.readFileSync(renameMapPath, "utf8"));
+    renameMap = { files: rm.files || {}, scoped: rm.scoped || {}, note: rm.note || "" };
+    if (!String(renameMap.note).trim()) problem("rename-map.json has no note (recovery record)");
+    for (const [f, map] of Object.entries(renameMap.files)) {
+      renameSlices.add(f);
+      for (const [name, target] of Object.entries(map)) {
+        flatRecorded++;
+        if (target === name) problem(`rename-map.json ${f}: "${name}" maps to itself`);
+        if (!/^[A-Za-z_$][\w$]*$/.test(target)) problem(`rename-map.json ${f}: "${name}" → "${target}" is not an identifier`);
+      }
+    }
+    for (const [f, map] of Object.entries(renameMap.scoped)) {
+      renameSlices.add(f);
+      for (const [name, hits] of Object.entries(map))
+        for (const [i, target] of hits) {
+          scopedRecorded++;
+          if (target === name) problem(`rename-map.json ${f}: "${name}" maps to itself at ${i}`);
+          if (!/^[A-Za-z_$][\w$]*$/.test(target)) problem(`rename-map.json ${f}: "${name}" → "${target}" is not an identifier`);
+        }
+    }
+  } catch (e) {
+    problem(`rename-map.json does not parse: ${e.message}`);
+  }
+}
+const recordFor = (file) => {
+  const files = renameMap.files[file];
+  const scoped = renameMap.scoped[file];
+  return files || scoped ? { files, scoped } : null;
+};
 
 const seen = new Set();
 const rangedFiles = new Set();
@@ -322,14 +375,31 @@ for (const s of sections) {
 }
 if (!rangedFiles.size) problem("no ranged src slices in split-spec.json (no reversed layer)");
 
-const onDisk = fs.existsSync(srcDir)
-  ? fs.readdirSync(srcDir).filter((f) => f.endsWith(".js")).sort()
-  : [];
+// src/ mirrors the served tree, so the walk is recursive; names are repo-relative
+const walkJs = (dir) => {
+  const out = [];
+  const rec = (d) => {
+    if (!fs.existsSync(d)) return;
+    for (const e of fs.readdirSync(d, { withFileTypes: true })) {
+      const p = path.join(d, e.name);
+      if (e.isDirectory()) rec(p);
+      else if (e.name.endsWith(".js")) out.push(path.relative(srcDir, p).split(path.sep).join("/"));
+    }
+  };
+  rec(dir);
+  return out.sort();
+};
+const onDisk = walkJs(srcDir);
 if (!onDisk.length) problem("src/ missing or empty (no reversed layer)");
 for (const f of onDisk) if (!rangedFiles.has(f)) problem(`src/${f} exists but is not a ranged slice in split-spec.json`);
 for (const f of rangedFiles) if (!onDisk.includes(f)) problem(`split-spec lists ${f} but it is not on disk`);
 for (const f of indexOnlyFiles)
   if (onDisk.includes(f)) problem(`index-only section ${f} must not have a src file on disk (wholeFile/skipped)`);
+// every rename-map.json record must be a ranged slice, on disk
+for (const f of renameSlices) {
+  if (!rangedFiles.has(f)) problem(`rename-map.json records ${f} but it is not a ranged slice in split-spec.json`);
+  else if (!onDisk.includes(f)) problem(`rename-map.json records ${f} but it is not on disk`);
+}
 
 // ── ranges: existence, bounds, tiling ───────────────────────────────────
 const bySource = new Map();
@@ -378,14 +448,15 @@ for (const [sourceFile, list] of bySource) {
   if (ok) tiledOK++;
 }
 
-// ── byte-exact round-trip + header provenance ───────────────────────────
+// ── byte-exact round-trip through the rename layer + header provenance ──
 let roundOK = 0,
-  ranged = 0;
+  ranged = 0,
+  renamedSlices = 0;
 for (const [, list] of bySource) {
   for (const { s, A, B } of list) {
     if (s.wholeFile === true || s.skipped === true) continue;
     ranged++;
-    const srcAbs = path.join(srcDir, path.basename(String(s.file)));
+    const srcAbs = path.join(srcDir, String(s.file));
     if (!fs.existsSync(srcAbs)) continue; // already reported
     const text = fs.readFileSync(srcAbs, "utf8");
     const nl1 = text.indexOf("\n");
@@ -404,11 +475,58 @@ for (const [, list] of bySource) {
     if (header2 !== want2) problem(`src/${s.file}: header line 2 is not the recorded range: ${header2}`);
     const body = text.slice(nl2 + 1);
     const srcLines = getLines(path.join(proj, s.sourceFile));
-    const expected = srcLines.slice(A - 1, B).join("\n") + "\n";
+    const raw = srcLines.slice(A - 1, B).join("\n") + "\n";
+    const record = recordFor(s.file);
+    let expected = raw;
+    if (record) {
+      renamedSlices++;
+      try {
+        expected = applyRecordedMap(raw, record);
+      } catch (e) {
+        problem(`src/${s.file}: recorded rename map does not apply: ${e.message}`);
+        continue;
+      }
+      if (body === raw) problem(`src/${s.file}: rename-map.json records a map but the body is unchanged (record not applied)`);
+    } else if (body !== raw) {
+      problem(`src/${s.file}: body differs from its readable range but rename-map.json records no map (unrecorded rename)`);
+    }
     if (body !== expected)
-      problem(`src/${s.file}: body is not a byte-exact round-trip of ${s.sourceFile} lines ${A}-${B}`);
+      problem(`src/${s.file}: body is not a byte-exact round-trip of ${s.sourceFile} lines ${A}-${B} (through the recorded rename map)`);
     else roundOK++;
   }
+}
+
+// ── rename-map honesty: indices address the recorded identifier tokens ──
+let scopedOK = 0;
+for (const [file, scoped] of Object.entries(renameMap.scoped)) {
+  const sec = sections.find((s) => s.file === file);
+  if (!sec || typeof sec.startLine !== "number" || typeof sec.sourceFile !== "string") continue;
+  const lines = getLines(path.join(proj, sec.sourceFile));
+  const range = lines.slice(sec.startLine - 1, sec.endLine).join("\n") + "\n";
+  const toks = tokens(range);
+  const foreign = foreignNameIndices(toks);
+  for (const [name, hits] of Object.entries(scoped)) {
+    for (const [i, target] of hits) {
+      const t = toks[i];
+      if (!t || t.t !== "id" || t.v !== name) {
+        problem(`rename-map.json ${file}: index ${i} is not the identifier "${name}" (${t ? t.t + "(" + JSON.stringify(t.v.slice(0, 20)) + ")" : "none"})`);
+        continue;
+      }
+      if (foreign.has(i)) problem(`rename-map.json ${file}: index ${i} ("${name}") is an import/export specifier (foreign) position`);
+      if (!/^[A-Za-z_$][\w$]*$/.test(target)) problem(`rename-map.json ${file}: "${name}" → "${target}" is not an identifier`);
+    }
+  }
+  scopedOK++;
+}
+let flatOK = 0;
+for (const [file, map] of Object.entries(renameMap.files)) {
+  const sec = sections.find((s) => s.file === file);
+  if (!sec || typeof sec.startLine !== "number" || typeof sec.sourceFile !== "string") continue;
+  const lines = getLines(path.join(proj, sec.sourceFile));
+  const range = lines.slice(sec.startLine - 1, sec.endLine).join("\n");
+  const ids = new Set(tokens(range).filter((t) => t.t === "id").map((t) => t.v));
+  for (const name of Object.keys(map)) if (!ids.has(name)) problem(`rename-map.json ${file}: word-boundary key "${name}" does not occur in the slice range`);
+  flatOK++;
 }
 
 // ── skipped sections: textual re-verification ───────────────────────────
@@ -502,11 +620,11 @@ if (manifest) {
 
 // ── machinery rule: wholeFile sections carry the recorded shape ─────────
 const MACHINERY_GUARDS = [
-  ["_nuxt__l-4XETKm-vendor.js", /__vite__mapDeps/, /NUXT_E1009/],
-  ["_nuxt__A3EUxX58-vendor.js", /captureStackTrace/, /extends Error/],
-  ["_nuxt__Buq_OoVt-vendor.js", /MathMLElement/, /querySelector/],
-  ["_nuxt__bBm2T0bl-vendor.js", /encodeURI/, /%5e/],
-  ["_nuxt__c0TEtrJJ-vendor.js", /A3EUxX58\.js/, /bBm2T0bl\.js/],
+  ["_nuxt/l-4XETKm-vendor.js", /__vite__mapDeps/, /NUXT_E1009/],
+  ["_nuxt/A3EUxX58-vendor.js", /captureStackTrace/, /extends Error/],
+  ["_nuxt/Buq_OoVt-vendor.js", /MathMLElement/, /querySelector/],
+  ["_nuxt/bBm2T0bl-vendor.js", /encodeURI/, /%5e/],
+  ["_nuxt/c0TEtrJJ-vendor.js", /A3EUxX58\.js/, /bBm2T0bl\.js/],
 ];
 for (const [file, reA, reB] of MACHINERY_GUARDS) {
   const sec = sections.find((s) => s.file === file);
@@ -526,7 +644,7 @@ for (const [file, reA, reB] of MACHINERY_GUARDS) {
 
 // ── Unity framework wholeFile guard + payload framing ──────────────────
 {
-  const fw = sections.find((s) => s.file === "unity-demo__Build__webBuild.framework.js.vendor.js");
+  const fw = sections.find((s) => s.file === "unity-demo/Build/webBuild.framework.js.vendor.js");
   if (!fw) problem("Unity framework wholeFile section missing from split-spec.json");
   else if (fw.wholeFile !== true) problem("Unity framework section is not wholeFile");
   else {
@@ -573,7 +691,7 @@ for (const capRel of Object.keys(manifest?.files ?? {})) {
   if (!/\.html$/i.test(capRel)) continue;
   const buf = fs.readFileSync(path.join(proj, capRel));
   const blocks = scanBlocks(buf);
-  const entryTag = capRel.replace(/\.html$/i, "").split("/").join("__");
+  const entryTag = capRel.replace(/\.html$/i, ""); // served path kept verbatim (dirs mirrored)
   for (const b of blocks) {
     if (isDataBlock(b)) {
       inlineData++;
@@ -608,7 +726,7 @@ let checkedImports = 0,
 for (const s of sections) {
   if (s.wholeFile === true || s.skipped === true) continue;
   if (!s.file || typeof s.sourceFile !== "string") continue;
-  const srcAbs = path.join(srcDir, path.basename(String(s.file)));
+  const srcAbs = path.join(srcDir, String(s.file));
   if (!fs.existsSync(srcAbs)) continue;
   const capRel = captureByPretty.get(s.sourceFile);
   const baseDir = capRel ? path.posix.dirname(capRel) : null;
@@ -660,7 +778,7 @@ for (const s of sections) {
 if (manifest) {
   for (const rel of Object.keys(manifest.files)) {
     const norm = rel.split(path.sep).join("/");
-    if (/^(readable|src|legacy)\//.test(norm) || norm === "split-spec.json")
+    if (/^(readable|src|legacy)\//.test(norm) || ["split-spec.json", "rename-map.json", "index-inline-map.json", "_mirror-report.json"].includes(norm))
       problem(`derived layer leaked into the capture manifest: ${rel}`);
   }
 }
@@ -727,7 +845,8 @@ function loadPinnedPrettier() {
     process.exit(1);
   }
   console.log(
-    `AUDIT PASS — ${sections.length} spec sections (${roundOK}/${ranged} src↔pretty round-trips byte-exact, ` +
+    `AUDIT PASS — ${sections.length} spec sections (${roundOK}/${ranged} src↔pretty round-trips byte-exact through the recorded rename map, ` +
+      `${renamedSlices} renamed slice(s), rename map ${flatRecorded} word-boundary + ${scopedRecorded} indexed record(s) over ${renameSlices.size} slice(s) token-validated, ` +
       `${tiledOK}/${bySource.size} pretty sources tiled contiguously, ` +
       `${skippedOK}/${skippedTotal} skipped sections re-verified textually, ` +
       `${checkOK}/${onDisk.length} src slices + ${prettyOK}/${prettyParsed} readable/*.pretty.js parse standalone (node --input-type=module --check -), ` +

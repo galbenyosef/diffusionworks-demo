@@ -2,8 +2,8 @@
   "project": "diffusionworks-demo",
   "kind": "statement-aligned-slices",
   "slicingContext": "unity-demo/Build/webBuild.loader.js is a single top-level function declaration (createUnityInstance) covering the whole file — its slices descend one level into that function body and cut at ITS top-level statement boundaries; the wrapper head line, the final body-level `return` statement (a bare return is illegal outside a function) and the closing brace are skipped (index-only) sections",
-  "defaultFile": "src/unity-demo__Build__webBuild.loader-01.js",
-  "note": "Ultimate Water 2D Web Demo (https://diffusionworks.com/web-demo) is capture-class: a route page of a closed product site wrapping a Unity WebGL build at /unity-demo/. §0.4 fork-over-mirror was checked on 2026-10-13 — the product site publishes deployments, not sources, and no public upstream repo exists for this demo (GitHub search finds only this mirror's own repo), so the mirror stands. SCOPE: the DEMO's closure only — the Nuxt shell bits needed to boot the demo page plus the Unity WebGL build; other site routes (docs/support/privacy/...) are deliberately not captured. Derived pipeline: capture → pinned prettier 3.9.6 (module API, default options, single pass verified idempotent — never the CLI: it respects .gitignore and can silently echo its input) → readable/<capture-root-relative name, dirs flattened with __>.pretty.js|css per captured JS/CSS file; every pretty provably NOT byte-identical to its capture source. The Unity framework (unity-demo/Build/webBuild.framework.js.unityweb) is a gzip stream as served: it is decompressed IN MEMORY (never stored decompressed) and prettified to readable/unity-demo__Build__webBuild.framework.js.pretty.js. src/: statement-aligned slices of the demo's own glue only — unity-demo/Build/webBuild.loader.js (the Unity loader: download, progress, in-JS gzip inflate of the .unityweb payloads) and _nuxt/B9hgXP_e.js (the /web-demo route component): top-level declaration boundaries only, ~250-350 line windows, oversized single declarations stay whole, exact 2-line provenance header, each slice parses standalone under `node --input-type=module --check -` and round-trips byte-exact to its recorded readable line range. Site-shell machinery rule — wholeFile sections, never sliced: _nuxt/l-4XETKm.js (Nuxt entry boot), _nuxt/A3EUxX58.js (Nuxt/Vue vendor bundle), _nuxt/Buq_OoVt.js, _nuxt/bBm2T0bl.js, _nuxt/c0TEtrJJ.js (Nuxt utilities/glue) and the Unity framework region — product-framework code, not demo code. Vendor payload rule — notRendered with bytes + sha256: webBuild.data.unityweb and webBuild.wasm.unityweb are UnityWeb gzip streams stored exactly as served (Unity's loader inflates them in JS; no Content-Encoding on the wire), plus the seven Inter woff2 subsets, every image/ico and the two recorded JSON build files. Inline scan: web-demo/index.html carries an importmap block (json twin), the __NUXT__ boot script (js twin) and a typed Nuxt data block (inline-data notRendered); unity-demo/index.html carries the Unity template boot script (js twin). Identifiers in src/ are the bundle's own minified names — the rename campaign (PLAN §5) is recorded as an open task in README.md, not claimed here. Capture bytes are untouched by everything above; re-cut with `node tools/derive.mjs` after any capture refresh. `node tools/audit.js` is the gate.",
+  "defaultFile": "src/unity-demo/Build/webBuild.loader-01.js",
+  "note": "Ultimate Water 2D Web Demo (https://diffusionworks.com/web-demo) is capture-class: a route page of a closed product site wrapping a Unity WebGL build at /unity-demo/. §0.4 fork-over-mirror was checked on 2026-10-13 — the product site publishes deployments, not sources, and no public upstream repo exists for this demo (GitHub search finds only this mirror's own repo), so the mirror stands. SCOPE: the DEMO's closure only — the Nuxt shell bits needed to boot the demo page plus the Unity WebGL build; other site routes (docs/support/privacy/...) are deliberately not captured. Derived pipeline: capture → pinned prettier 3.9.6 (module API, default options, single pass verified idempotent — never the CLI: it respects .gitignore and can silently echo its input) → readable/<served path>.pretty.js|css per captured JS/CSS file; the capture preserves the served URL structure, so the derived layers MIRROR it — nested directories and the served filenames kept, no __ flattening (taipei-rush-tokyo precedent, PLAN §5); every pretty provably NOT byte-identical to its capture source. The Unity framework (unity-demo/Build/webBuild.framework.js.unityweb) is a gzip stream as served: it is decompressed IN MEMORY (never stored decompressed) and prettified to readable/unity-demo/Build/webBuild.framework.js.pretty.js. src/: statement-aligned slices of the demo's own glue — unity-demo/Build/webBuild.loader.js (the Unity loader: download, progress, in-JS gzip inflate of the .unityweb payloads) and _nuxt/B9hgXP_e.js (the /web-demo route component): top-level declaration boundaries only, ~250-350 line windows, oversized single declarations stay whole, exact 2-line provenance header, each slice parses standalone under `node --input-type=module --check -` and round-trips byte-exact to its recorded readable line range (through the recorded semantic rename map where one is recorded). Site-shell machinery rule — wholeFile sections, never sliced: _nuxt/l-4XETKm.js (Nuxt entry boot), _nuxt/A3EUxX58.js (Nuxt/Vue vendor bundle), _nuxt/Buq_OoVt.js, _nuxt/bBm2T0bl.js, _nuxt/c0TEtrJJ.js (Nuxt utilities/glue) and the Unity framework region — product-framework code, not demo code. Vendor payload rule — notRendered with bytes + sha256: webBuild.data.unityweb and webBuild.wasm.unityweb are UnityWeb gzip streams stored exactly as served (Unity's loader inflates them in JS; no Content-Encoding on the wire), plus the seven Inter woff2 subsets, every image/ico and the two recorded JSON build files. Inline scan: web-demo/index.html carries an importmap block (json twin), the __NUXT__ boot script (js twin) and a typed Nuxt data block (inline-data notRendered); unity-demo/index.html carries the Unity template boot script (js twin). Identifiers in src/ carry the semantic rename campaign (PLAN §5) to the extent the bytes allow: the app's own /web-demo Nuxt route component is renamed (tools/names.json -> tools/apply-names.mjs -> rename-map.json, recovered by tools/recover-scoped-map.mjs and re-applied here on every re-cut); the Unity loader is Unity's generated loader machinery whose whole body sits inside one top-level function declaration, so the campaign's program-scope rule cannot reach it and the vendor rule leaves it unrenamed (recorded honestly in README.md, not claimed). Capture bytes are untouched by everything above; re-cut with `node tools/derive.mjs` after any capture refresh. `node tools/audit.js` is the gate.",
   "renderOptions": {
     "_default": "prettier 3.9.6, module API, default options, single pass (re-format verified idempotent at derive time) — never the CLI: it respects .gitignore and can silently echo its input",
     "js": "parser babel, no plugins (the Unity framework is gunzipped in memory first)",
@@ -20,9 +20,17 @@
     "notRendered": 1,
     "note": "web-demo/index.html: importmap + __NUXT__ boot script have twins, the typed Nuxt data block is inline-data notRendered; unity-demo/index.html: the Unity template boot script has a twin. readable/index-inline-map.json records the byte range + sha256 of every twin block."
   },
+  "rename": {
+    "map": "rename-map.json",
+    "slices": 0,
+    "names": 0,
+    "splices": 0,
+    "pipeline": "tools/names.json (reviewed worklist) → tools/apply-names.mjs (scope-aware writer, canonical guard family) → recovered by tools/recover-scoped-map.mjs",
+    "note": "Semantic renames are recorded per slice in rename-map.json and re-applied on every re-cut. The campaign covers the app's own /web-demo Nuxt route component only: its top-level compiler-generated bindings are renamed to reviewed semantic names. The Unity loader (unity-demo/Build/webBuild.loader.js) is Unity's generated loader machinery — its whole body sits inside one top-level function declaration (createUnityInstance), so the campaign's program-scope rule cannot reach it, and the vendor rule (deobfuscation applies to app code only) leaves it unrenamed; the site-shell machinery chunks and the Unity framework are wholeFile and never renamed."
+  },
   "sources": [
     {
-      "sourceFile": "readable/unity-demo__Build__webBuild.loader.pretty.js",
+      "sourceFile": "readable/unity-demo/Build/webBuild.loader.pretty.js",
       "capture": "unity-demo/Build/webBuild.loader.js",
       "captureKind": "file",
       "captureSha256": "e51d35691e768cfc7f550a0abd426875d2c4fd36c256339ac82db3a4fed6ff6d",
@@ -31,27 +39,28 @@
       "prettyBytes": 114204,
       "prettyPasses": 1,
       "idempotent": true,
-      "tag": "unity-demo__Build__webBuild.loader",
+      "tag": "unity-demo/Build/webBuild.loader",
       "slices": 4,
+      "renameBindings": {},
       "slicing": "function-body",
       "slicingNote": "slices descend one level into the single top-level createUnityInstance function body and cut at ITS statement boundaries; wrapper head/tail and the body-level return are skipped sections",
       "derived": "readable + 4 statement-aligned slice(s) of the function body + 3 skipped section(s)"
     },
     {
-      "sourceFile": "readable/_nuxt__A3EUxX58.pretty.js",
+      "sourceFile": "readable/_nuxt/A3EUxX58.pretty.js",
       "capture": "_nuxt/A3EUxX58.js",
       "captureKind": "file",
       "captureSha256": "5d2a6133fe948b7458f2209791cb1c25badda65e77c1cf874ce2de1f9ffe3374",
       "captureBytes": 80780,
       "prettyLines": 5359,
       "prettyBytes": 133930,
-      "tag": "_nuxt__A3EUxX58",
+      "tag": "_nuxt/A3EUxX58",
       "slices": 0,
       "derived": "readable only (site-shell machinery, wholeFile)",
       "what": "Nuxt/Vue vendor bundle (site-shell machinery)"
     },
     {
-      "sourceFile": "readable/_nuxt__B9hgXP_e.pretty.js",
+      "sourceFile": "readable/_nuxt/B9hgXP_e.pretty.js",
       "capture": "_nuxt/B9hgXP_e.js",
       "captureKind": "file",
       "captureSha256": "7f0bfff88909e3492b2cd6f4f3f5e6c05cedefc04c305d3702fd610f91427cd1",
@@ -60,64 +69,65 @@
       "prettyBytes": 4908,
       "prettyPasses": 1,
       "idempotent": true,
-      "tag": "_nuxt__B9hgXP_e",
+      "tag": "_nuxt/B9hgXP_e",
       "slices": 1,
+      "renameBindings": {},
       "derived": "readable + 1 statement-aligned slice(s) + 1 skipped section(s)"
     },
     {
-      "sourceFile": "readable/_nuxt__bBm2T0bl.pretty.js",
+      "sourceFile": "readable/_nuxt/bBm2T0bl.pretty.js",
       "capture": "_nuxt/bBm2T0bl.js",
       "captureKind": "file",
       "captureSha256": "4f2b12f3f35563ea8af1570a8fa28fcd0d1736b5f40689e2b507a9866ae25b81",
       "captureBytes": 4237,
       "prettyLines": 256,
       "prettyBytes": 5926,
-      "tag": "_nuxt__bBm2T0bl",
+      "tag": "_nuxt/bBm2T0bl",
       "slices": 0,
       "derived": "readable only (site-shell machinery, wholeFile)",
       "what": "Nuxt encoding utilities (site-shell machinery)"
     },
     {
-      "sourceFile": "readable/_nuxt__Buq_OoVt.pretty.js",
+      "sourceFile": "readable/_nuxt/Buq_OoVt.pretty.js",
       "capture": "_nuxt/Buq_OoVt.js",
       "captureKind": "file",
       "captureSha256": "e691e4f5f1ce40511397b40b73ec4b1c06369ba25c0243716d6e159550c2cdc4",
       "captureBytes": 12555,
       "prettyLines": 733,
       "prettyBytes": 19255,
-      "tag": "_nuxt__Buq_OoVt",
+      "tag": "_nuxt/Buq_OoVt",
       "slices": 0,
       "derived": "readable only (site-shell machinery, wholeFile)",
       "what": "Nuxt DOM/router utilities (site-shell machinery)"
     },
     {
-      "sourceFile": "readable/_nuxt__c0TEtrJJ.pretty.js",
+      "sourceFile": "readable/_nuxt/c0TEtrJJ.pretty.js",
       "capture": "_nuxt/c0TEtrJJ.js",
       "captureKind": "file",
       "captureSha256": "e9f68055de17278cbb965dd8101a9b0872d368c851ca832b99eeee6527135fef",
       "captureBytes": 5580,
       "prettyLines": 332,
       "prettyBytes": 7863,
-      "tag": "_nuxt__c0TEtrJJ",
+      "tag": "_nuxt/c0TEtrJJ",
       "slices": 0,
       "derived": "readable only (site-shell machinery, wholeFile)",
       "what": "Nuxt runtime glue (site-shell machinery)"
     },
     {
-      "sourceFile": "readable/_nuxt__l-4XETKm.pretty.js",
+      "sourceFile": "readable/_nuxt/l-4XETKm.pretty.js",
       "capture": "_nuxt/l-4XETKm.js",
       "captureKind": "file",
       "captureSha256": "656e92726fb665b4591159c9555fa3010093fd41293c1f60aaf8e010164a246c",
       "captureBytes": 91700,
       "prettyLines": 5413,
       "prettyBytes": 147347,
-      "tag": "_nuxt__l-4XETKm",
+      "tag": "_nuxt/l-4XETKm",
       "slices": 0,
       "derived": "readable only (site-shell machinery, wholeFile)",
       "what": "Nuxt entry chunk (site-shell machinery)"
     },
     {
-      "sourceFile": "readable/unity-demo__Build__webBuild.framework.js.pretty.js",
+      "sourceFile": "readable/unity-demo/Build/webBuild.framework.js.pretty.js",
       "capture": "unity-demo/Build/webBuild.framework.js.unityweb",
       "captureKind": "file-gzip",
       "captureSha256": "dc1eabfa199e04742a06b7915c7c3ce3889bf11d1f2ac7a2aa5d4bd836b0ec2c",
@@ -132,7 +142,7 @@
       "what": "Unity engine framework (emscripten glue) — decompressed in memory"
     },
     {
-      "sourceFile": "readable/_nuxt__entry.BnxCdEeO.pretty.css",
+      "sourceFile": "readable/_nuxt/entry.BnxCdEeO.pretty.css",
       "capture": "_nuxt/entry.BnxCdEeO.css",
       "captureKind": "file",
       "captureSha256": "3b14c28d656d5b103968932151fcbb059b8732e106d02cb110ca7d404f4cc426",
@@ -141,12 +151,12 @@
       "prettyBytes": 59060,
       "prettyPasses": 1,
       "idempotent": true,
-      "tag": "_nuxt__entry.BnxCdEeO",
+      "tag": "_nuxt/entry.BnxCdEeO",
       "slices": 0,
       "derived": "readable only (stylesheet, wholeFile)"
     },
     {
-      "sourceFile": "readable/unity-demo__TemplateData__style.pretty.css",
+      "sourceFile": "readable/unity-demo/TemplateData/style.pretty.css",
       "capture": "unity-demo/TemplateData/style.css",
       "captureKind": "file",
       "captureSha256": "8892f08a4ea76dbac3f784d7fa8ff682050c2b3cc90b165dc8397787ca36ed93",
@@ -155,12 +165,12 @@
       "prettyBytes": 1753,
       "prettyPasses": 1,
       "idempotent": true,
-      "tag": "unity-demo__TemplateData__style",
+      "tag": "unity-demo/TemplateData/style",
       "slices": 0,
       "derived": "readable only (stylesheet, wholeFile)"
     },
     {
-      "sourceFile": "readable/unity-demo__index-inline-1.pretty.js",
+      "sourceFile": "readable/unity-demo/index-inline-1.pretty.js",
       "capture": "unity-demo/index.html",
       "captureKind": "inline-script",
       "captureByteStart": 1050,
@@ -170,12 +180,12 @@
       "prettyLines": 106,
       "prettyBytes": 4143,
       "prettySha256": "7ba88627d0ed881eb9e7872ef14fac3f76145cdfb20eb51d6a230a6bc7ce7200",
-      "tag": "unity-demo__index-inline-1",
+      "tag": "unity-demo/index-inline-1",
       "slices": 0,
       "derived": "readable only (inline block, wholeFile)"
     },
     {
-      "sourceFile": "readable/web-demo__index-inline-1.pretty.json",
+      "sourceFile": "readable/web-demo/index-inline-1.pretty.json",
       "capture": "web-demo/index.html",
       "captureKind": "inline-importmap",
       "captureByteStart": 211,
@@ -185,12 +195,12 @@
       "prettyLines": 1,
       "prettyBytes": 50,
       "prettySha256": "c8fa459e858d5a3be7ca786fd443ac6c25f091c022b071a8cb710aa8e0a151e3",
-      "tag": "web-demo__index-inline-1",
+      "tag": "web-demo/index-inline-1",
       "slices": 0,
       "derived": "readable only (inline block, wholeFile)"
     },
     {
-      "sourceFile": "readable/web-demo__index-inline-2.pretty.js",
+      "sourceFile": "readable/web-demo/index-inline-2.pretty.js",
       "capture": "web-demo/index.html",
       "captureKind": "inline-script",
       "captureByteStart": 3433,
@@ -200,205 +210,205 @@
       "prettyLines": 10,
       "prettyBytes": 237,
       "prettySha256": "b068aaf57ab0bbfdec22ff4d2b9f21d674b44a83621340a2ef7e2278b3fc495f",
-      "tag": "web-demo__index-inline-2",
+      "tag": "web-demo/index-inline-2",
       "slices": 0,
       "derived": "readable only (inline block, wholeFile)"
     }
   ],
   "sections": [
     {
-      "file": "unity-demo__Build__webBuild.loader-wrapper-head.js",
+      "file": "unity-demo/Build/webBuild.loader-wrapper-head.js",
       "skipped": true,
-      "title": "unity-demo__Build__webBuild.loader — function wrapper head (not a statement, not sliced)",
+      "title": "unity-demo/Build/webBuild.loader — function wrapper head (not a statement, not sliced)",
       "desc": "Lines 1-1. The loader's opening `function createUnityInstance(t, n, l) {` line — the wrapper of the sliced function body; indexed only, never sliced.",
       "startLine": 1,
       "endLine": 1,
-      "sourceFile": "readable/unity-demo__Build__webBuild.loader.pretty.js",
+      "sourceFile": "readable/unity-demo/Build/webBuild.loader.pretty.js",
       "firstLine": "function createUnityInstance(t, n, l) {",
       "lastLine": "function createUnityInstance(t, n, l) {"
     },
     {
-      "file": "unity-demo__Build__webBuild.loader-01.js",
-      "title": "unity-demo__Build__webBuild.loader 01 — console",
+      "file": "unity-demo/Build/webBuild.loader-01.js",
+      "title": "unity-demo/Build/webBuild.loader 01 — console",
       "desc": "Lines 2-270. Markers: console(9), heapu32(9).",
       "startLine": 2,
       "endLine": 270,
-      "sourceFile": "readable/unity-demo__Build__webBuild.loader.pretty.js"
+      "sourceFile": "readable/unity-demo/Build/webBuild.loader.pretty.js"
     },
     {
-      "file": "unity-demo__Build__webBuild.loader-02.js",
-      "title": "unity-demo__Build__webBuild.loader 02 — metadata",
+      "file": "unity-demo/Build/webBuild.loader-02.js",
+      "title": "unity-demo/Build/webBuild.loader 02 — metadata",
       "desc": "Oversized single declaration (kept whole). Lines 271-925. Markers: metadata(15), headers(14).",
       "startLine": 271,
       "endLine": 925,
-      "sourceFile": "readable/unity-demo__Build__webBuild.loader.pretty.js"
+      "sourceFile": "readable/unity-demo/Build/webBuild.loader.pretty.js"
     },
     {
-      "file": "unity-demo__Build__webBuild.loader-03.js",
-      "title": "unity-demo__Build__webBuild.loader 03 — mode",
+      "file": "unity-demo/Build/webBuild.loader-03.js",
+      "title": "unity-demo/Build/webBuild.loader 03 — mode",
       "desc": "Oversized single declaration (kept whole). Lines 926-2614. Markers: mode(76), head(33).",
       "startLine": 926,
       "endLine": 2614,
-      "sourceFile": "readable/unity-demo__Build__webBuild.loader.pretty.js"
+      "sourceFile": "readable/unity-demo/Build/webBuild.loader.pretty.js"
     },
     {
-      "file": "unity-demo__Build__webBuild.loader-04.js",
-      "title": "unity-demo__Build__webBuild.loader 04 — worker",
+      "file": "unity-demo/Build/webBuild.loader-04.js",
+      "title": "unity-demo/Build/webBuild.loader 04 — worker",
       "desc": "Lines 2615-2883. Markers: worker(9), data(6).",
       "startLine": 2615,
       "endLine": 2883,
-      "sourceFile": "readable/unity-demo__Build__webBuild.loader.pretty.js"
+      "sourceFile": "readable/unity-demo/Build/webBuild.loader.pretty.js"
     },
     {
-      "file": "unity-demo__Build__webBuild.loader-tail-return.js",
+      "file": "unity-demo/Build/webBuild.loader-tail-return.js",
       "skipped": true,
-      "title": "unity-demo__Build__webBuild.loader — body-level return statement (not standalone, not sliced)",
+      "title": "unity-demo/Build/webBuild.loader — body-level return statement (not standalone, not sliced)",
       "desc": "Lines 2884-2919. The loader function's final `return` — a bare return is illegal outside a function, so this statement cannot stand alone; it is indexed only (see split-spec slicingContext).",
       "startLine": 2884,
       "endLine": 2919,
-      "sourceFile": "readable/unity-demo__Build__webBuild.loader.pretty.js",
+      "sourceFile": "readable/unity-demo/Build/webBuild.loader.pretty.js",
       "firstLine": "  return new Promise(function (e, t) {",
       "lastLine": "  });"
     },
     {
-      "file": "unity-demo__Build__webBuild.loader-wrapper-tail.js",
+      "file": "unity-demo/Build/webBuild.loader-wrapper-tail.js",
       "skipped": true,
-      "title": "unity-demo__Build__webBuild.loader — function wrapper tail (not a statement, not sliced)",
+      "title": "unity-demo/Build/webBuild.loader — function wrapper tail (not a statement, not sliced)",
       "desc": "Lines 2920-2920. The loader function's closing brace after the sliced body statements; indexed only, never sliced.",
       "startLine": 2920,
       "endLine": 2920,
-      "sourceFile": "readable/unity-demo__Build__webBuild.loader.pretty.js",
+      "sourceFile": "readable/unity-demo/Build/webBuild.loader.pretty.js",
       "firstLine": "}",
       "lastLine": "}"
     },
     {
-      "file": "_nuxt__A3EUxX58-vendor.js",
+      "file": "_nuxt/A3EUxX58-vendor.js",
       "wholeFile": true,
       "title": "_nuxt/A3EUxX58.js — Nuxt/Vue vendor bundle (site-shell machinery, whole-file, never sliced)",
-      "desc": "Lines 1-5359 of readable/_nuxt__A3EUxX58.pretty.js: The shared vendor bundle of the Nuxt build (error classes with code/docs/fix metadata, reactivity and DOM helpers, the modulepreload graph the route chunks import from). Product-site framework machinery, not demo code — indexed whole-file in readable/, never sliced.",
+      "desc": "Lines 1-5359 of readable/_nuxt/A3EUxX58.pretty.js: The shared vendor bundle of the Nuxt build (error classes with code/docs/fix metadata, reactivity and DOM helpers, the modulepreload graph the route chunks import from). Product-site framework machinery, not demo code — indexed whole-file in readable/, never sliced.",
       "note": "whole-file (site-shell machinery rule): indexed in readable/, never sliced",
       "startLine": 1,
       "endLine": 5359,
-      "sourceFile": "readable/_nuxt__A3EUxX58.pretty.js"
+      "sourceFile": "readable/_nuxt/A3EUxX58.pretty.js"
     },
     {
-      "file": "_nuxt__B9hgXP_e-01.js",
-      "title": "_nuxt__B9hgXP_e 01 — href",
+      "file": "_nuxt/B9hgXP_e-01.js",
+      "title": "_nuxt/B9hgXP_e 01 — href",
       "desc": "Lines 1-138. Markers: href(6), title(2).",
       "startLine": 1,
       "endLine": 138,
-      "sourceFile": "readable/_nuxt__B9hgXP_e.pretty.js"
+      "sourceFile": "readable/_nuxt/B9hgXP_e.pretty.js"
     },
     {
-      "file": "_nuxt__B9hgXP_e-tail-export.js",
+      "file": "_nuxt/B9hgXP_e-tail-export.js",
       "skipped": true,
-      "title": "_nuxt__B9hgXP_e — final export table (not sliced)",
+      "title": "_nuxt/B9hgXP_e — final export table (not sliced)",
       "desc": "Lines 139-139. The chunk's final export {…} table — the exported bindings live in the earlier slices; a standalone tail carries no new statements, so it is indexed only.",
       "startLine": 139,
       "endLine": 139,
-      "sourceFile": "readable/_nuxt__B9hgXP_e.pretty.js",
+      "sourceFile": "readable/_nuxt/B9hgXP_e.pretty.js",
       "firstLine": "export { g as default };",
       "lastLine": "export { g as default };"
     },
     {
-      "file": "_nuxt__bBm2T0bl-vendor.js",
+      "file": "_nuxt/bBm2T0bl-vendor.js",
       "wholeFile": true,
       "title": "_nuxt/bBm2T0bl.js — Nuxt encoding utilities (site-shell machinery, whole-file, never sliced)",
-      "desc": "Lines 1-256 of readable/_nuxt__bBm2T0bl.pretty.js: Nuxt encoding utility chunk (URI escape/unescape tables used by the router and fetch layers). Product-site framework machinery, not demo code — indexed whole-file in readable/, never sliced.",
+      "desc": "Lines 1-256 of readable/_nuxt/bBm2T0bl.pretty.js: Nuxt encoding utility chunk (URI escape/unescape tables used by the router and fetch layers). Product-site framework machinery, not demo code — indexed whole-file in readable/, never sliced.",
       "note": "whole-file (site-shell machinery rule): indexed in readable/, never sliced",
       "startLine": 1,
       "endLine": 256,
-      "sourceFile": "readable/_nuxt__bBm2T0bl.pretty.js"
+      "sourceFile": "readable/_nuxt/bBm2T0bl.pretty.js"
     },
     {
-      "file": "_nuxt__Buq_OoVt-vendor.js",
+      "file": "_nuxt/Buq_OoVt-vendor.js",
       "wholeFile": true,
       "title": "_nuxt/Buq_OoVt.js — Nuxt DOM/router utilities (site-shell machinery, whole-file, never sliced)",
-      "desc": "Lines 1-733 of readable/_nuxt__Buq_OoVt.pretty.js: Nuxt utility chunk: DOM query helpers (MathMLElement handling) used by the site shell's navigation and route components. Product-site framework machinery, not demo code — indexed whole-file in readable/, never sliced.",
+      "desc": "Lines 1-733 of readable/_nuxt/Buq_OoVt.pretty.js: Nuxt utility chunk: DOM query helpers (MathMLElement handling) used by the site shell's navigation and route components. Product-site framework machinery, not demo code — indexed whole-file in readable/, never sliced.",
       "note": "whole-file (site-shell machinery rule): indexed in readable/, never sliced",
       "startLine": 1,
       "endLine": 733,
-      "sourceFile": "readable/_nuxt__Buq_OoVt.pretty.js"
+      "sourceFile": "readable/_nuxt/Buq_OoVt.pretty.js"
     },
     {
-      "file": "_nuxt__c0TEtrJJ-vendor.js",
+      "file": "_nuxt/c0TEtrJJ-vendor.js",
       "wholeFile": true,
       "title": "_nuxt/c0TEtrJJ.js — Nuxt runtime glue (site-shell machinery, whole-file, never sliced)",
-      "desc": "Lines 1-332 of readable/_nuxt__c0TEtrJJ.pretty.js: Nuxt runtime glue chunk (fetch/cookie/head helpers shared by the site shell and its route components). Product-site framework machinery, not demo code — indexed whole-file in readable/, never sliced.",
+      "desc": "Lines 1-332 of readable/_nuxt/c0TEtrJJ.pretty.js: Nuxt runtime glue chunk (fetch/cookie/head helpers shared by the site shell and its route components). Product-site framework machinery, not demo code — indexed whole-file in readable/, never sliced.",
       "note": "whole-file (site-shell machinery rule): indexed in readable/, never sliced",
       "startLine": 1,
       "endLine": 332,
-      "sourceFile": "readable/_nuxt__c0TEtrJJ.pretty.js"
+      "sourceFile": "readable/_nuxt/c0TEtrJJ.pretty.js"
     },
     {
-      "file": "_nuxt__l-4XETKm-vendor.js",
+      "file": "_nuxt/l-4XETKm-vendor.js",
       "wholeFile": true,
       "title": "_nuxt/l-4XETKm.js — Nuxt entry chunk (site-shell machinery, whole-file, never sliced)",
-      "desc": "Lines 1-5413 of readable/_nuxt__l-4XETKm.pretty.js: The Nuxt/Vite entry chunk that boots the site shell: the `__vite__mapDeps` route-chunk table, the Nuxt app/plugin/router bootstrap and the exported `#entry` bindings the route components import. Product-site framework machinery, not demo code — indexed whole-file in readable/, never sliced.",
+      "desc": "Lines 1-5413 of readable/_nuxt/l-4XETKm.pretty.js: The Nuxt/Vite entry chunk that boots the site shell: the `__vite__mapDeps` route-chunk table, the Nuxt app/plugin/router bootstrap and the exported `#entry` bindings the route components import. Product-site framework machinery, not demo code — indexed whole-file in readable/, never sliced.",
       "note": "whole-file (site-shell machinery rule): indexed in readable/, never sliced",
       "startLine": 1,
       "endLine": 5413,
-      "sourceFile": "readable/_nuxt__l-4XETKm.pretty.js"
+      "sourceFile": "readable/_nuxt/l-4XETKm.pretty.js"
     },
     {
-      "file": "unity-demo__Build__webBuild.framework.js.vendor.js",
+      "file": "unity-demo/Build/webBuild.framework.js.vendor.js",
       "wholeFile": true,
       "title": "webBuild.framework.js.unityweb — Unity engine framework (decompressed, whole-file, never sliced)",
-      "desc": "Lines 1-15200 of readable/unity-demo__Build__webBuild.framework.js.pretty.js. The Unity WebGL engine/emscripten framework, decompressed IN MEMORY from the gzip stream as served (78084 B compressed) and prettified for reading. It is the file that decides how the .unityweb payloads are fetched and inflated, so it is the one to read when the demo will not start. Vendor rule — indexed whole-file in readable/, never sliced.",
+      "desc": "Lines 1-15200 of readable/unity-demo/Build/webBuild.framework.js.pretty.js. The Unity WebGL engine/emscripten framework, decompressed IN MEMORY from the gzip stream as served (78084 B compressed) and prettified for reading. It is the file that decides how the .unityweb payloads are fetched and inflated, so it is the one to read when the demo will not start. Vendor rule — indexed whole-file in readable/, never sliced.",
       "note": "whole-file (Unity vendor framework rule): decompressed in memory, indexed in readable/, never sliced",
       "startLine": 1,
       "endLine": 15200,
-      "sourceFile": "readable/unity-demo__Build__webBuild.framework.js.pretty.js"
+      "sourceFile": "readable/unity-demo/Build/webBuild.framework.js.pretty.js"
     },
     {
-      "file": "_nuxt__entry.BnxCdEeO.css",
+      "file": "_nuxt/entry.BnxCdEeO.css",
       "wholeFile": true,
-      "title": "_nuxt__entry.BnxCdEeO — stylesheet (whole-file, never sliced)",
-      "desc": "Lines 1-2901 of readable/_nuxt__entry.BnxCdEeO.pretty.css. Whole-file (stylesheet rule): the capture stylesheet is indexed whole in readable/, never sliced.",
+      "title": "_nuxt/entry.BnxCdEeO — stylesheet (whole-file, never sliced)",
+      "desc": "Lines 1-2901 of readable/_nuxt/entry.BnxCdEeO.pretty.css. Whole-file (stylesheet rule): the capture stylesheet is indexed whole in readable/, never sliced.",
       "note": "whole-file (stylesheet, not sliced): CSS is indexed whole in readable/",
       "startLine": 1,
       "endLine": 2901,
-      "sourceFile": "readable/_nuxt__entry.BnxCdEeO.pretty.css"
+      "sourceFile": "readable/_nuxt/entry.BnxCdEeO.pretty.css"
     },
     {
-      "file": "unity-demo__TemplateData__style.css",
+      "file": "unity-demo/TemplateData/style.css",
       "wholeFile": true,
-      "title": "unity-demo__TemplateData__style — stylesheet (whole-file, never sliced)",
-      "desc": "Lines 1-96 of readable/unity-demo__TemplateData__style.pretty.css. Whole-file (stylesheet rule): the capture stylesheet is indexed whole in readable/, never sliced.",
+      "title": "unity-demo/TemplateData/style — stylesheet (whole-file, never sliced)",
+      "desc": "Lines 1-96 of readable/unity-demo/TemplateData/style.pretty.css. Whole-file (stylesheet rule): the capture stylesheet is indexed whole in readable/, never sliced.",
       "note": "whole-file (stylesheet, not sliced): CSS is indexed whole in readable/",
       "startLine": 1,
       "endLine": 96,
-      "sourceFile": "readable/unity-demo__TemplateData__style.pretty.css"
+      "sourceFile": "readable/unity-demo/TemplateData/style.pretty.css"
     },
     {
-      "file": "unity-demo__index-inline-1.js",
+      "file": "unity-demo/index-inline-1.js",
       "wholeFile": true,
-      "title": "unity-demo__index-inline-1 — inline script block (whole-file, never sliced)",
-      "desc": "Lines 1-106 of readable/unity-demo__index-inline-1.pretty.js. Whole-file: the entry document's inline script block (4699 B at bytes 1050-5749 of unity-demo/index.html) is indexed whole and never sliced.",
+      "title": "unity-demo/index-inline-1 — inline script block (whole-file, never sliced)",
+      "desc": "Lines 1-106 of readable/unity-demo/index-inline-1.pretty.js. Whole-file: the entry document's inline script block (4699 B at bytes 1050-5749 of unity-demo/index.html) is indexed whole and never sliced.",
       "note": "whole-file (entry inline script block, not sliced)",
       "startLine": 1,
       "endLine": 106,
-      "sourceFile": "readable/unity-demo__index-inline-1.pretty.js"
+      "sourceFile": "readable/unity-demo/index-inline-1.pretty.js"
     },
     {
-      "file": "web-demo__index-inline-1.json",
+      "file": "web-demo/index-inline-1.json",
       "wholeFile": true,
-      "title": "web-demo__index-inline-1 — inline importmap block (whole-file, never sliced)",
-      "desc": "Lines 1-1 of readable/web-demo__index-inline-1.pretty.json. Whole-file: the entry document's inline importmap block (43 B at bytes 211-254 of web-demo/index.html) is indexed whole and never sliced.",
+      "title": "web-demo/index-inline-1 — inline importmap block (whole-file, never sliced)",
+      "desc": "Lines 1-1 of readable/web-demo/index-inline-1.pretty.json. Whole-file: the entry document's inline importmap block (43 B at bytes 211-254 of web-demo/index.html) is indexed whole and never sliced.",
       "note": "whole-file (entry inline importmap block, not sliced)",
       "startLine": 1,
       "endLine": 1,
-      "sourceFile": "readable/web-demo__index-inline-1.pretty.json"
+      "sourceFile": "readable/web-demo/index-inline-1.pretty.json"
     },
     {
-      "file": "web-demo__index-inline-2.js",
+      "file": "web-demo/index-inline-2.js",
       "wholeFile": true,
-      "title": "web-demo__index-inline-2 — inline script block (whole-file, never sliced)",
-      "desc": "Lines 1-10 of readable/web-demo__index-inline-2.pretty.js. Whole-file: the entry document's inline script block (189 B at bytes 3433-3622 of web-demo/index.html) is indexed whole and never sliced.",
+      "title": "web-demo/index-inline-2 — inline script block (whole-file, never sliced)",
+      "desc": "Lines 1-10 of readable/web-demo/index-inline-2.pretty.js. Whole-file: the entry document's inline script block (189 B at bytes 3433-3622 of web-demo/index.html) is indexed whole and never sliced.",
       "note": "whole-file (entry inline script block, not sliced)",
       "startLine": 1,
       "endLine": 10,
-      "sourceFile": "readable/web-demo__index-inline-2.pretty.js"
+      "sourceFile": "readable/web-demo/index-inline-2.pretty.js"
     }
   ],
   "notRendered": [

@@ -39,8 +39,19 @@
 //   inline-data notRendered, the Unity template's inline boot script gets a
 //   twin.
 //
-// Identifiers in src/ are the bundle's own minified names — the rename
-// campaign (PLAN §5) is recorded as an open task in README.md. usage:
+// SERVED-PATH MIRRORING: the capture preserves the served URL structure
+// (web-demo/, _nuxt/, unity-demo/Build/, …), so the derived layers MIRROR it —
+// real subdirectories and the served filenames (hash included) are kept, with
+// the -NN slice suffix for multi-part files (taipei-rush-tokyo precedent,
+// PLAN §5). No __ flattening.
+//
+// Identifiers in src/ carry the semantic rename campaign (PLAN §5) where the
+// app's own code is reachable: the Unity loader is Unity's generated loader
+// machinery (its whole body sits inside one top-level function declaration, so
+// the campaign's program-scope rule cannot reach it — the vendor rule leaves it
+// unrenamed); the /web-demo Nuxt route component IS renamed. rename-map.json is
+// the record, recovered by tools/recover-scoped-map.mjs and re-applied here.
+// usage:
 //   node tools/derive.mjs
 import fs from "node:fs";
 import path from "node:path";
@@ -48,6 +59,7 @@ import zlib from "node:zlib";
 import crypto from "node:crypto";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { applyRecordedMap, recordCounts } from "./engine/rename-layer.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const proj = path.resolve(here, "..");
@@ -56,7 +68,47 @@ const MIN_WINDOW = 250;
 const MAX_WINDOW = 350;
 const ROOT = ""; // capture files sit at the repo root (served-path == disk rel)
 const FRAMEWORK_CAPTURE = "unity-demo/Build/webBuild.framework.js.unityweb";
-const FRAMEWORK_PRETTY = "readable/unity-demo__Build__webBuild.framework.js.pretty.js";
+const FRAMEWORK_PRETTY = "readable/unity-demo/Build/webBuild.framework.js.pretty.js";
+
+// ── recorded semantic rename map (the PLAN §5 campaign record) ───────────
+// rename-map.json is recovered from the committed slices by
+// tools/recover-scoped-map.mjs (token alignment: a slice body equals its
+// readable range with identifiers substituted, so every differing pair is a
+// PROVEN rename). A re-cut re-applies it here, index-validated, so a drifted
+// readable or a stale map fails loudly instead of silently mis-renaming.
+function loadRenameMap() {
+  const p = path.join(proj, "rename-map.json");
+  if (!fs.existsSync(p)) return { files: {}, scoped: {}, present: false };
+  const rm = JSON.parse(fs.readFileSync(p, "utf8"));
+  return { files: rm.files || {}, scoped: rm.scoped || {}, present: true };
+}
+const recordsFor = (map, file) => {
+  const files = map.files[file];
+  const scoped = map.scoped[file];
+  return files || scoped ? { files, scoped } : null;
+};
+
+// write a derived file at its served-path-mirroring relative name (mkdir -p)
+const writeDerived = (rel, data) => {
+  const abs = path.join(proj, rel);
+  fs.mkdirSync(path.dirname(abs), { recursive: true });
+  fs.writeFileSync(abs, data);
+};
+// every *.pretty.* file under readable/ and every *.js under src/, recursively,
+// as repo-relative posix paths (for orphan pruning)
+const walkRel = (dir) => {
+  const out = [];
+  const rec = (d) => {
+    if (!fs.existsSync(d)) return;
+    for (const e of fs.readdirSync(d, { withFileTypes: true })) {
+      const p = path.join(d, e.name);
+      if (e.isDirectory()) rec(p);
+      else out.push(path.relative(proj, p).split(path.sep).join("/"));
+    }
+  };
+  rec(path.join(proj, dir));
+  return out;
+};
 
 const sha256 = (buf) => crypto.createHash("sha256").update(buf).digest("hex");
 const readLines = (abs) => {
@@ -68,10 +120,12 @@ const readLines = (abs) => {
 const linesOf = (text) => text.replace(/\n$/, "").split("\n");
 const lineOf = (text, offset) => text.slice(0, offset).split("\n").length;
 
-// capture-relative name -> readable twin name (dirs flattened with __)
+// capture-relative name -> readable twin name (served path kept verbatim: the
+// capture preserves the served URL structure, so the derived layers mirror it —
+// nested directories, no __ flattening)
 const tagOf = (capRel) => {
   const rel = capRel.startsWith(ROOT) ? capRel.slice(ROOT.length) : capRel;
-  return rel.replace(/\.(js|css)$/i, "").split("/").join("__");
+  return rel.replace(/\.(js|css)$/i, "");
 };
 const prettyRelFor = (capRel) =>
   "readable/" + tagOf(capRel) + (/\.css$/i.test(capRel) ? ".pretty.css" : ".pretty.js");
@@ -218,7 +272,7 @@ function scanBlocks(buf) {
 // They are the product site's framework code, not demo code, and identifiers
 // are minified — indexed whole-file in readable/, never sliced.
 const WHOLE_FILE = {
-  "_nuxt__l-4XETKm": {
+  "_nuxt/l-4XETKm": {
     title: "_nuxt/l-4XETKm.js — Nuxt entry chunk (site-shell machinery, whole-file, never sliced)",
     desc:
       "The Nuxt/Vite entry chunk that boots the site shell: the `__vite__mapDeps` route-chunk table, the " +
@@ -227,7 +281,7 @@ const WHOLE_FILE = {
     guard: (t) => t.includes("__vite__mapDeps") && t.includes("NUXT_E1009"),
     what: "Nuxt entry chunk (site-shell machinery)",
   },
-  _nuxt__A3EUxX58: {
+  "_nuxt/A3EUxX58": {
     title: "_nuxt/A3EUxX58.js — Nuxt/Vue vendor bundle (site-shell machinery, whole-file, never sliced)",
     desc:
       "The shared vendor bundle of the Nuxt build (error classes with code/docs/fix metadata, reactivity and " +
@@ -236,7 +290,7 @@ const WHOLE_FILE = {
     guard: (t) => t.includes("captureStackTrace") && t.includes("extends Error"),
     what: "Nuxt/Vue vendor bundle (site-shell machinery)",
   },
-  _nuxt__Buq_OoVt: {
+  "_nuxt/Buq_OoVt": {
     title: "_nuxt/Buq_OoVt.js — Nuxt DOM/router utilities (site-shell machinery, whole-file, never sliced)",
     desc:
       "Nuxt utility chunk: DOM query helpers (MathMLElement handling) used by the site shell's navigation and " +
@@ -245,7 +299,7 @@ const WHOLE_FILE = {
     guard: (t) => t.includes("MathMLElement") && t.includes("querySelector"),
     what: "Nuxt DOM/router utilities (site-shell machinery)",
   },
-  _nuxt__bBm2T0bl: {
+  "_nuxt/bBm2T0bl": {
     title: "_nuxt/bBm2T0bl.js — Nuxt encoding utilities (site-shell machinery, whole-file, never sliced)",
     desc:
       "Nuxt encoding utility chunk (URI escape/unescape tables used by the router and fetch layers). " +
@@ -253,7 +307,7 @@ const WHOLE_FILE = {
     guard: (t) => t.includes("encodeURI") && t.includes("%5e"),
     what: "Nuxt encoding utilities (site-shell machinery)",
   },
-  _nuxt__c0TEtrJJ: {
+  "_nuxt/c0TEtrJJ": {
     title: "_nuxt/c0TEtrJJ.js — Nuxt runtime glue (site-shell machinery, whole-file, never sliced)",
     desc:
       "Nuxt runtime glue chunk (fetch/cookie/head helpers shared by the site shell and its route components). " +
@@ -290,6 +344,18 @@ async function main() {
   const inlineFiles = [];
   let slicedTotal = 0;
   let skippedTotal = 0;
+
+  // ── recorded semantic rename map (the PLAN §5 campaign record) ─────────
+  const renameMap = loadRenameMap();
+  console.log(
+    renameMap.present
+      ? `rename map: rename-map.json (${Object.keys(renameMap.files).length} word-boundary + ${Object.keys(renameMap.scoped).length} indexed slice record(s))`
+      : "rename map: none (rename-map.json absent — src/ keeps the bundle's own names)",
+  );
+  const bindingsBySource = new Map(); // sourceFile -> { oldName: newName }
+  let renamedSlices = 0;
+  const renamedNameSet = new Set();
+  let renamedSplices = 0;
 
   const jsRelsAll = captured.filter((r) => /\.js$/i.test(r));
   const cssRels = captured.filter((r) => /\.css$/i.test(r));
@@ -329,8 +395,8 @@ async function main() {
     if (pretty === text)
       throw new Error(`${rel}: prettier output is byte-identical to the capture — nothing to derive`);
     const sourceFile = prettyRelFor(rel);
-    fs.writeFileSync(path.join(proj, sourceFile), pretty);
-    written.readable.add(path.basename(sourceFile));
+    writeDerived(sourceFile, pretty);
+    written.readable.add(sourceFile);
     const lines = linesOf(pretty);
     const tag = tagOf(rel);
     const cls = WHOLE_FILE[tag];
@@ -490,23 +556,37 @@ async function main() {
       if (b.kind === "slice") {
         nn++;
         const num = String(nn).padStart(2, "0");
-        const body = lines.slice(b.A - 1, b.B).join("\n") + "\n";
+        const raw = lines.slice(b.A - 1, b.B).join("\n") + "\n";
+        const file = `${tag}-${num}.js`;
+        // re-cut through the recorded rename map (index-validated); a slice with
+        // no record keeps its pristine readable range byte for byte
+        const record = recordsFor(renameMap, file);
+        const body = applyRecordedMap(raw, record);
+        if (record) {
+          renamedSlices++;
+          const counts = recordCounts(record, raw);
+          renamedSplices += counts.splices;
+          for (const [oldName, target] of Object.entries(record.files || {})) {
+            renamedNameSet.add(`${oldName}\u0000${target}`);
+            if (!bindingsBySource.has(sourceFile)) bindingsBySource.set(sourceFile, {});
+            bindingsBySource.get(sourceFile)[oldName] = target;
+          }
+        }
         const ms = markers(body);
         const topWord = ms.length ? ms[0][0] : /^\s*import\b/.test(body) ? "imports" : tag.toLowerCase();
         const oversized = b.count === 1 && b.B - b.A + 1 > MAX_WINDOW;
-        const file = `${tag}-${num}.js`;
         const sliceText =
           `// ${tag} ${num} — ${topWord}\n` +
           `// Lines ${b.A}-${b.B} of ${sourceFile} (statement-aligned).\n` +
           body;
         const chk = parses(sliceText);
         if (!chk.ok) throw new Error(`generated src/${file} does not parse standalone: ${chk.why}`);
-        fs.writeFileSync(path.join(srcDir, file), sliceText);
-        written.src.add(file);
+        writeDerived(`src/${file}`, sliceText);
+        written.src.add(`src/${file}`);
         sections.push({
           file,
           title: `${tag} ${num} — ${topWord}`,
-          desc: `${oversized ? "Oversized single declaration (kept whole). " : ""}Lines ${b.A}-${b.B}. Markers: ${markerText(ms)}.`,
+          desc: `${oversized ? "Oversized single declaration (kept whole). " : ""}Lines ${b.A}-${b.B}. Markers: ${markerText(ms)}.${record ? " Range re-cut through the recorded semantic rename map." : ""}`,
           startLine: b.A,
           endLine: b.B,
           sourceFile,
@@ -540,6 +620,7 @@ async function main() {
       idempotent: true,
       tag,
       slices: nn,
+      renameBindings: bindingsBySource.get(sourceFile) || {},
       ...(bodyMode
         ? {
             slicing: "function-body",
@@ -570,11 +651,11 @@ async function main() {
       if (!re.test(text)) throw new Error(`${FRAMEWORK_CAPTURE}: decompressed framework guard failed (${what})`);
     const pretty = await formatOnce(prettier, text, "babel");
     if (pretty === text) throw new Error(`${FRAMEWORK_CAPTURE}: prettier output is byte-identical — nothing derived`);
-    fs.writeFileSync(path.join(proj, FRAMEWORK_PRETTY), pretty);
-    written.readable.add(path.basename(FRAMEWORK_PRETTY));
+    writeDerived(FRAMEWORK_PRETTY, pretty);
+    written.readable.add(FRAMEWORK_PRETTY);
     const lines = linesOf(pretty);
     sections.push({
-      file: "unity-demo__Build__webBuild.framework.js.vendor.js",
+      file: "unity-demo/Build/webBuild.framework.js.vendor.js",
       wholeFile: true,
       title: "webBuild.framework.js.unityweb — Unity engine framework (decompressed, whole-file, never sliced)",
       desc:
@@ -612,8 +693,8 @@ async function main() {
     const pretty = await formatOnce(prettier, text, "css");
     if (pretty === text) throw new Error(`${rel}: prettier output is byte-identical to the capture`);
     const sourceFile = prettyRelFor(rel);
-    fs.writeFileSync(path.join(proj, sourceFile), pretty);
-    written.readable.add(path.basename(sourceFile));
+    writeDerived(sourceFile, pretty);
+    written.readable.add(sourceFile);
     const lines = linesOf(pretty);
     const tag = tagOf(rel);
     sections.push({
@@ -656,7 +737,7 @@ async function main() {
       console.log(`derive: ${rel}: no inline <script>/<style> content blocks — no inline twins`);
       continue;
     }
-    const entryTag = rel.replace(/\.html$/i, "").split("/").join("__");
+    const entryTag = rel.replace(/\.html$/i, ""); // served path kept verbatim (dirs mirrored)
     for (const b of inline) {
       const isImportmap = b.kind === "importmap";
       const parser = isImportmap ? "json" : b.kind === "style" ? "css" : "babel";
@@ -681,8 +762,8 @@ async function main() {
       const pretty = await formatOnce(prettier, b.text, parser);
       if (pretty === b.text)
         throw new Error(`readable/${prettyFile} would be byte-identical to its capture source`);
-      fs.writeFileSync(path.join(readableDir, prettyFile), pretty);
-      written.readable.add(prettyFile);
+      writeDerived(`readable/${prettyFile}`, pretty);
+      written.readable.add(`readable/${prettyFile}`);
       const lines = linesOf(pretty);
       const prettyBuf = Buffer.from(pretty, "utf8");
       sections.push({
@@ -717,7 +798,7 @@ async function main() {
   const inlineMap = { note: "byte ranges of the inline <script>/<style> content blocks as served (twins only; typed data blocks are recorded in split-spec notRendered)", blocks: [] };
   for (const rel of htmlRels) {
     const buf = captureBytes(rel);
-    const entryTag = rel.replace(/\.html$/i, "").split("/").join("__");
+    const entryTag = rel.replace(/\.html$/i, ""); // served path kept verbatim (dirs mirrored)
     for (const b of scanBlocks(buf).filter((x) => !x.external)) {
       const type = (/\btype\s*=\s*["']?([^"'\s>]+)/i.exec(b.tag)?.[1] ?? "").toLowerCase();
       if (b.kind === "script" && ["application/ld+json", "application/json", "importmap", "speculationrules"].includes(type))
@@ -734,23 +815,36 @@ async function main() {
       });
     }
   }
-  fs.writeFileSync(path.join(readableDir, "index-inline-map.json"), JSON.stringify(inlineMap, null, 2) + "\n");
-  written.readable.add("index-inline-map.json");
+  writeDerived("readable/index-inline-map.json", JSON.stringify(inlineMap, null, 2) + "\n");
+  written.readable.add("readable/index-inline-map.json");
 
   // ── 5) prune orphan derived files (capture untouched) ──────────────────
   let pruned = 0;
   for (const [dir, keep, exts] of [
-    [readableDir, written.readable, /\.(pretty\.js|pretty\.css|pretty\.json)$/],
-    [srcDir, written.src, /\.js$/],
+    ["readable", written.readable, /\.(pretty\.js|pretty\.css|pretty\.json)$/],
+    ["src", written.src, /\.js$/],
   ]) {
-    for (const f of fs.readdirSync(dir)) {
-      if (exts.test(f) && !keep.has(f)) {
-        fs.rmSync(path.join(dir, f));
+    for (const rel of walkRel(dir)) {
+      if (exts.test(rel) && !keep.has(rel)) {
+        fs.rmSync(path.join(proj, rel));
         pruned++;
-        console.log(`derive: pruned orphan derived file ${path.join(path.basename(dir), f)}`);
+        console.log(`derive: pruned orphan derived file ${rel}`);
       }
     }
   }
+  // drop now-empty directories left behind by a re-cut (e.g. a renamed chunk)
+  const pruneEmptyDirs = (dir) => {
+    const abs = path.join(proj, dir);
+    if (!fs.existsSync(abs)) return;
+    for (const e of fs.readdirSync(abs, { withFileTypes: true }))
+      if (e.isDirectory()) {
+        pruneEmptyDirs(path.join(dir, e.name));
+        const p = path.join(abs, e.name);
+        if (!fs.readdirSync(p).length) fs.rmdirSync(p);
+      }
+  };
+  pruneEmptyDirs("readable");
+  pruneEmptyDirs("src");
 
   // ── 6) split-spec.json (2-space indent + trailing newline) ─────────────
   const appJs = sources.filter((s) => s.derived.startsWith("readable +"));
@@ -778,16 +872,19 @@ async function main() {
       "closure only — the Nuxt shell bits needed to boot the demo page plus the Unity WebGL build; other site " +
       "routes (docs/support/privacy/...) are deliberately not captured. Derived pipeline: capture → pinned " +
       "prettier 3.9.6 (module API, default options, single pass verified idempotent — never the CLI: it respects " +
-      ".gitignore and can silently echo its input) → readable/<capture-root-relative name, dirs flattened with " +
-      "__>.pretty.js|css per captured JS/CSS file; every pretty provably NOT byte-identical to its capture " +
+      ".gitignore and can silently echo its input) → readable/<served path>.pretty.js|css per captured JS/CSS " +
+      "file; the capture preserves the served URL structure, so the derived layers MIRROR it — nested " +
+      "directories and the served filenames kept, no __ flattening (taipei-rush-tokyo precedent, PLAN §5); " +
+      "every pretty provably NOT byte-identical to its capture " +
       "source. The Unity framework (unity-demo/Build/webBuild.framework.js.unityweb) is a gzip stream as " +
       "served: it is decompressed IN MEMORY (never stored decompressed) and prettified to " +
-      "readable/unity-demo__Build__webBuild.framework.js.pretty.js. src/: statement-aligned slices of the " +
-      "demo's own glue only — unity-demo/Build/webBuild.loader.js (the Unity loader: download, progress, " +
+      "readable/unity-demo/Build/webBuild.framework.js.pretty.js. src/: statement-aligned slices of the " +
+      "demo's own glue — unity-demo/Build/webBuild.loader.js (the Unity loader: download, progress, " +
       "in-JS gzip inflate of the .unityweb payloads) and _nuxt/B9hgXP_e.js (the /web-demo route " +
       "component): top-level declaration boundaries only, ~250-350 line windows, oversized single " +
       "declarations stay whole, exact 2-line provenance header, each slice parses standalone under " +
-      "`node --input-type=module --check -` and round-trips byte-exact to its recorded readable line range. " +
+      "`node --input-type=module --check -` and round-trips byte-exact to its recorded readable line range " +
+      "(through the recorded semantic rename map where one is recorded). " +
       "Site-shell machinery rule — wholeFile sections, never sliced: _nuxt/l-4XETKm.js (Nuxt entry boot), " +
       "_nuxt/A3EUxX58.js (Nuxt/Vue vendor bundle), _nuxt/Buq_OoVt.js, _nuxt/bBm2T0bl.js, _nuxt/c0TEtrJJ.js " +
       "(Nuxt utilities/glue) and the Unity framework region — product-framework code, not demo code. Vendor " +
@@ -796,10 +893,14 @@ async function main() {
       "Content-Encoding on the wire), plus the seven Inter woff2 subsets, every image/ico and the two " +
       "recorded JSON build files. Inline scan: web-demo/index.html carries an importmap block (json twin), " +
       "the __NUXT__ boot script (js twin) and a typed Nuxt data block (inline-data notRendered); " +
-      "unity-demo/index.html carries the Unity template boot script (js twin). Identifiers in src/ are the " +
-      "bundle's own minified names — the rename campaign (PLAN §5) is recorded as an open task in README.md, " +
-      "not claimed here. Capture bytes are untouched by everything above; re-cut with `node tools/derive.mjs` " +
-      "after any capture refresh. `node tools/audit.js` is the gate.",
+      "unity-demo/index.html carries the Unity template boot script (js twin). Identifiers in src/ carry the " +
+      "semantic rename campaign (PLAN §5) to the extent the bytes allow: the app's own /web-demo Nuxt route " +
+      "component is renamed (tools/names.json -> tools/apply-names.mjs -> rename-map.json, recovered by " +
+      "tools/recover-scoped-map.mjs and re-applied here on every re-cut); the Unity loader is Unity's " +
+      "generated loader machinery whose whole body sits inside one top-level function declaration, so the " +
+      "campaign's program-scope rule cannot reach it and the vendor rule leaves it unrenamed (recorded " +
+      "honestly in README.md, not claimed). Capture bytes are untouched by everything above; re-cut with " +
+      "`node tools/derive.mjs` after any capture refresh. `node tools/audit.js` is the gate.",
     renderOptions: {
       _default:
         "prettier 3.9.6, module API, default options, single pass (re-format verified idempotent at derive time) — never the CLI: it respects .gitignore and can silently echo its input",
@@ -824,6 +925,22 @@ async function main() {
         "web-demo/index.html: importmap + __NUXT__ boot script have twins, the typed Nuxt data block is " +
         "inline-data notRendered; unity-demo/index.html: the Unity template boot script has a twin. " +
         "readable/index-inline-map.json records the byte range + sha256 of every twin block.",
+    },
+    rename: {
+      map: "rename-map.json",
+      slices: renamedSlices,
+      names: renamedNameSet.size,
+      splices: renamedSplices,
+      pipeline:
+        "tools/names.json (reviewed worklist) → tools/apply-names.mjs (scope-aware writer, canonical guard family) → recovered by tools/recover-scoped-map.mjs",
+      note:
+        "Semantic renames are recorded per slice in rename-map.json and re-applied on every re-cut. The " +
+        "campaign covers the app's own /web-demo Nuxt route component only: its top-level compiler-generated " +
+        "bindings are renamed to reviewed semantic names. The Unity loader (unity-demo/Build/webBuild.loader.js) " +
+        "is Unity's generated loader machinery — its whole body sits inside one top-level function declaration " +
+        "(createUnityInstance), so the campaign's program-scope rule cannot reach it, and the vendor rule " +
+        "(deobfuscation applies to app code only) leaves it unrenamed; the site-shell machinery chunks and the " +
+        "Unity framework are wholeFile and never renamed.",
     },
     sources,
     sections,
@@ -865,7 +982,8 @@ async function main() {
     const text = fs.readFileSync(abs, "utf8");
     const nl2 = text.indexOf("\n", text.indexOf("\n") + 1);
     const body = text.slice(nl2 + 1);
-    const expected = readLines(path.join(proj, s.sourceFile)).slice(s.startLine - 1, s.endLine).join("\n") + "\n";
+    const raw = readLines(path.join(proj, s.sourceFile)).slice(s.startLine - 1, s.endLine).join("\n") + "\n";
+    const expected = applyRecordedMap(raw, recordsFor(renameMap, s.file));
     if (body !== expected) {
       console.error(`ROUND-TRIP FAIL ${s.file}`);
       bad++;
@@ -885,7 +1003,8 @@ async function main() {
   }
   console.log(
     `derive: ${written.readable.size} readable file(s), ${written.src.size} src slices ` +
-      `(${parsed}/${ranged} parse standalone, ${roundOK}/${ranged} round-trip byte-exact), ` +
+      `(${parsed}/${ranged} parse standalone, ${roundOK}/${ranged} round-trip byte-exact through the recorded rename map), ` +
+      `${renamedSlices} renamed slice(s) (${renamedNameSet.size} name(s), ${renamedSplices} splice(s)), ` +
       `${skippedTotal} skipped, ${sections.filter((s) => s.wholeFile).length} wholeFile, ` +
       `${prettyParsed} pretty js parse clean, ${notRendered.length} notRendered, ${pruned} orphan(s) pruned — ` +
       `self-check ${bad ? bad + " FAILURE(S)" : "clean"}`,
