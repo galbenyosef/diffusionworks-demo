@@ -571,6 +571,17 @@ async function main() {
             if (!bindingsBySource.has(sourceFile)) bindingsBySource.set(sourceFile, {});
             bindingsBySource.get(sourceFile)[oldName] = target;
           }
+          // a scoped name that reaches ONE target is also a chunk-level binding
+          // rename — the reconstruction gates reach it in index-only skipped
+          // sections (the final `export {…}` table) through this map (t)(1)
+          for (const [oldName, hits] of Object.entries(record.scoped || {})) {
+            const targets = new Set(hits.map(([, t]) => t));
+            if (targets.size !== 1) continue;
+            const target = [...targets][0];
+            renamedNameSet.add(`${oldName}\u0000${target}`);
+            if (!bindingsBySource.has(sourceFile)) bindingsBySource.set(sourceFile, {});
+            bindingsBySource.get(sourceFile)[oldName] = target;
+          }
         }
         const ms = markers(body);
         const topWord = ms.length ? ms[0][0] : /^\s*import\b/.test(body) ? "imports" : tag.toLowerCase();

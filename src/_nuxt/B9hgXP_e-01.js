@@ -11,17 +11,17 @@ import {
   x as s,
 } from "./A3EUxX58.js";
 import { a as c, i as l, t as u } from "#entry";
-var d = { class: `content-page web-demo-page` },
-  f = { class: `site-header` },
-  p = { class: `shell header-inner` },
-  m = { class: `shell site-footer web-demo-footer` },
-  h = { class: `site-footer__copyright` },
-  g = e({
+var pageRootAttrs = { class: `content-page web-demo-page` },
+  siteHeaderAttrs = { class: `site-header` },
+  headerInnerAttrs = { class: `shell header-inner` },
+  siteFooterAttrs = { class: `shell site-footer web-demo-footer` },
+  copyrightAttrs = { class: `site-footer__copyright` },
+  webDemoPage = e({
     __name: `web-demo`,
     setup(e) {
       let g = a(),
-        _ = String(g.public.siteUrl).replace(/\/+$/, ``),
-        v = `${_}/web-demo`;
+        siteUrlBase = String(g.public.siteUrl).replace(/\/+$/, ``),
+        pageUrl = `${siteUrlBase}/web-demo`;
       return (
         c({
           title: `Ultimate Water 2D Web Demo | DiffusionWorks`,
@@ -29,24 +29,24 @@ var d = { class: `content-page web-demo-page` },
           ogTitle: `Ultimate Water 2D Web Demo | DiffusionWorks`,
           ogDescription: `Try the interactive Ultimate Water 2D Unity demo directly in your browser.`,
           ogType: `website`,
-          ogUrl: v,
-          ogImage: `${_}/asset-store/ultimate-water-2d-social-1200x630.png`,
+          ogUrl: pageUrl,
+          ogImage: `${siteUrlBase}/asset-store/ultimate-water-2d-social-1200x630.png`,
           twitterCard: `summary_large_image`,
         }),
-        l({ link: [{ rel: `canonical`, href: v }] }),
+        l({ link: [{ rel: `canonical`, href: pageUrl }] }),
         (e, a) => {
           let c = u;
           return (
             n(),
-            o(`div`, d, [
+            o(`div`, pageRootAttrs, [
               (a[2] ||= s(
                 `a`,
                 { class: `skip-link`, href: `#main` },
                 `Skip to demo`,
                 -1,
               )),
-              s(`header`, f, [
-                s(`div`, p, [
+              s(`header`, siteHeaderAttrs, [
+                s(`div`, headerInnerAttrs, [
                   r(c, { href: `/` }),
                   (a[0] ||= s(
                     `nav`,
@@ -120,10 +120,10 @@ var d = { class: `content-page web-demo-page` },
                 ],
                 -1,
               )),
-              s(`footer`, m, [
+              s(`footer`, siteFooterAttrs, [
                 s(
                   `p`,
-                  h,
+                  copyrightAttrs,
                   `© ` + i(new Date().getFullYear()) + ` DiffusionWorks`,
                   1,
                 ),

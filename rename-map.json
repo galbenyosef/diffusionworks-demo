@@ -1,0 +1,24 @@
+{
+  "note": "Semantic rename map for src/, recovered mechanically by anchor alignment from the committed slices (tools/recover-scoped-map.mjs): the token streams of a slice and its readable range must be identical in every non-identifier position, so every differing identifier pair is a proven rename, not a guess. `files` is a word-boundary map, used only where a name means the same thing everywhere in the slice and is never a property or object key; `scoped` addresses the rest by exact token index as { name: [[i, target], …] }. tools/derive.mjs re-applies this map when it re-cuts src/ (index-validated), tools/verify-rename.mjs and tools/audit.js re-prove every slice from it, and tools/check-chunk.mjs proves cross-slice references still resolve. Regenerate with `node tools/recover-scoped-map.mjs` after any rename batch.",
+  "files": {
+    "_nuxt/B9hgXP_e-01.js": {
+      "_": "siteUrlBase",
+      "d": "pageRootAttrs",
+      "f": "siteHeaderAttrs",
+      "h": "copyrightAttrs",
+      "m": "siteFooterAttrs",
+      "p": "headerInnerAttrs",
+      "v": "pageUrl"
+    }
+  },
+  "scoped": {
+    "_nuxt/B9hgXP_e-01.js": {
+      "g": [
+        [
+          106,
+          "webDemoPage"
+        ]
+      ]
+    }
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "__note": "Reviewed rename worklist for diffusionworks-demo (PLAN §5 campaign). SCOPE: the app surface the bytes allow. The app is a Unity WebGL build inside a one-route Nuxt shell: the only reachable app code is the /web-demo Nuxt route component (_nuxt/B9hgXP_e.js) — a compiled Vue SFC whose author-facing content is in the template strings while the compiler generated the short top-level bindings. This worklist renames exactly those program-scope compiler bindings (the static-node descriptors d/f/p/m/h and the component definition g, named from the class strings and __name) plus the two setup() locals (_ and v, the site-URL base and the canonical page URL). Every rule is evidence-based: the note names the string/declaration it was authored from (line numbers refer to readable/_nuxt/B9hgXP_e.pretty.js at the 2026-10-13 capture). The import aliases (e,t,n,r,i,a,o,s,c,l,u) are the compiled chunk's own import bindings whose foreign export names (A,D,H,k,kt,o,w,x,a,i,t) are opaque vendor exports; the campaign writer does not rename import bindings (a token pass cannot rename an import alias and its foreign side safely), so they are left as bundled — a recorded review exclusion, not a rename. The Unity loader (unity-demo/Build/webBuild.loader.js) is Unity's generated loader machinery: its whole body sits inside one top-level function declaration (createUnityInstance), so the campaign's program-scope rule cannot reach it (apply-names --list: 0 ELIGIBLE, 1 refused), and the vendor rule (deobfuscation applies to app code only) leaves it unrenamed — recorded honestly. tools/apply-names.mjs refuses collisions, shorthand positions and chained renames; tools/verify-rename.mjs + tools/check-chunk.mjs prove the result.",
+  "app": {
+    "readable/_nuxt/B9hgXP_e.pretty.js": {
+      "d": "pageRootAttrs",
+      "f": "siteHeaderAttrs",
+      "p": "headerInnerAttrs",
+      "m": "siteFooterAttrs",
+      "h": "copyrightAttrs",
+      "g": "webDemoPage"
+    }
+  },
+  "files": {
+    "_nuxt/B9hgXP_e-01.js": [
+      {
+        "scope": "setup",
+        "renames": {
+          "_": "siteUrlBase",
+          "v": "pageUrl"
+        }
+      }
+    ]
+  }
+}

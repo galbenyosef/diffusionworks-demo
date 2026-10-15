@@ -86,14 +86,27 @@ inlined; not used), and `web-demo/index.html` — the route is served bare at
 - `unity-demo/` — the demo as served: `index.html`, `TemplateData/` (stylesheet,
   favicon, Unity template images) and `Build/` (loader + three `.unityweb` payloads)
 - `.upstream/manifest.json` — sha256 for every captured file (Gen-A)
-- `readable/` — prettified derived layer (pinned prettier 3.9.6): the six shell
-  chunks, the Unity loader, the Unity framework (gunzipped in memory, never stored
-  decompressed), both stylesheets and the three inline twin blocks
-- `src/` + `split-spec.json` — 5 statement-aligned slices of the demo glue (the
-  Unity loader's function body and the `/web-demo` route component) with the
-  recorded derivation spec
+- `readable/` — prettified derived layer (pinned prettier 3.9.6), mirroring the
+  served path (nested dirs, no `__` flattening): `readable/_nuxt/` (the six shell
+  chunks + `entry.BnxCdEeO.pretty.css`), `readable/unity-demo/Build/` (the Unity
+  loader + the framework, gunzipped in memory, never stored decompressed),
+  `readable/unity-demo/TemplateData/style.pretty.css` and the inline twin blocks
+  under `readable/web-demo/` and `readable/unity-demo/`
+- `src/` + `split-spec.json` — 5 statement-aligned slices of the demo glue, mirroring
+  the served path (`src/unity-demo/Build/webBuild.loader-0N.js` — the Unity loader's
+  function body — and `src/_nuxt/B9hgXP_e-01.js` — the `/web-demo` route component),
+  with the recorded derivation spec and the semantic rename layer
+- `rename-map.json` — the PLAN §5 campaign record (the app route component's opaque
+  compiler bindings → reviewed names; re-applied by `derive.mjs` on every re-cut)
+- `legacy/2026-10-15/` — the superseded flat `readable/` + `src/` layers (archive-both
+  rule; the rollback path alongside git history)
 - `tools/derive.mjs` — rebuild `readable/` + `src/` + `split-spec.json`
-- `tools/audit.js` — integrity gate for the derived layers (`AUDIT PASS`)
+- `tools/audit.js` — integrity gate for the derived layers, incl. the rename map (`AUDIT PASS`)
+- `tools/apply-names.mjs` + `tools/names.json` — the PLAN §5 campaign writer + reviewed worklist
+- `tools/recover-scoped-map.mjs` — recover `rename-map.json` from the committed slices
+- `tools/verify-rename.mjs` / `tools/check-chunk.mjs` / `tools/refcheck.mjs` — the campaign gates
+- `tools/probe-structure.mjs` / `tools/engine/rename-layer.mjs` / `tools/lib-acorn.mjs` — structure probe + shared rename engine
+- `tools/record-manifest.mjs` — re-cut / `--check` `.upstream/manifest.json` (derived paths excluded)
 - `tools/serve.mjs` — dependency-free preview server (byte-exact, no added
   Content-Encoding; maps `/web-demo` to its directory index)
 - `tools/update.mjs` — read-only drift probe against the live origin
@@ -150,8 +163,12 @@ extensions alone and work too.
 ## Verify
 
 ```
-node tools/verify.mjs     # re-hash the capture against the manifest (34 files)
-node tools/audit.js       # derived-layer integrity gate (AUDIT PASS)
+node tools/verify.mjs                 # re-hash the capture against the manifest (34 files)
+node tools/audit.js                   # derived-layer + rename-map integrity gate (AUDIT PASS)
+node tools/record-manifest.mjs --check  # the committed manifest matches the capture walk
+node tools/verify-rename.mjs --all    # every slice reproduces byte-exact through rename-map.json
+node tools/check-chunk.mjs --all      # cross-slice calls still resolve after the rename
+node tools/derive.mjs                 # re-cut readable/ + src/ + split-spec.json (byte-reproducible)
 ```
 
 ## Updating from upstream
@@ -170,6 +187,12 @@ fetch into a clean tree and re-cutting the derived layers on top of the new capt
 (`node tools/derive.mjs`, then `node tools/audit.js`).
 
 ### 2026-10-13 derivation note
+
+> **Superseded 2026-10-15** — this note records the first cut, when the derived
+> layers used flat `__`-joined filenames (e.g. `readable/_nuxt__B9hgXP_e.pretty.js`).
+> The 2026-10-15 structure pass re-cut them to mirror the served path (see the
+> section below); the flat layers now live under `legacy/2026-10-15/`. The Unity
+> boundary and gzip facts below are unchanged and still factual.
 
 Both derived layers are in place, cut from the recorded capture (capture bytes
 untouched — `node tools/verify.mjs` re-hashes all 34 files):
@@ -239,8 +262,97 @@ untouched — `node tools/verify.mjs` re-hashes all 34 files):
   `#entry` importmap target, `/favicon.ico`) which were fetched to fixpoint; the
   only deliberately unfetched references are the seven lazy route chunks of other
   site routes (documented above).
-- Identifier note — src/ keeps the bundles' own minified names; the rename
-  campaign (PLAN §5) is recorded here as an **open task**, not claimed.
+- Identifier note (2026-10-13) — src/ kept the bundles' own minified names; the
+  rename campaign (PLAN §5) was recorded as an **open task**. It was closed on
+  2026-10-15 to the extent the bytes allow — see the structure + rename section
+  below. Rebuild the derived layers any time with `node tools/derive.mjs`.
+
+### 2026-10-15 structure pass + identifier rename campaign (the open task, closed)
+
+Mission of this pass: converge the derived layers on the real project shape and
+run the PLAN §5 identifier rename campaign. The capture was **not** touched —
+`node tools/verify.mjs` still re-hashes all 34 files (0 problems) — so this
+section is entirely about `readable/`, `src/`, `split-spec.json`, `rename-map.json`,
+`tools/` and `legacy/`.
+
+- **Served-path mirroring (structure)** — the capture preserves the served URL
+  structure (`web-demo/`, `_nuxt/`, `unity-demo/Build/`, `unity-demo/TemplateData/`),
+  so the derived layers now MIRROR it (PLAN §5, taipei-rush-tokyo precedent,
+  2026-10-14): nested directories, the served filenames kept, no `__` flattening.
+  `readable/_nuxt/B9hgXP_e.pretty.js`, `readable/unity-demo/Build/webBuild.loader.pretty.js`,
+  `src/_nuxt/B9hgXP_e-01.js`, `src/unity-demo/Build/webBuild.loader-0N.js`. The
+  superseded flat layers are archived under `legacy/2026-10-15/` (archive-both rule).
+- **App vs Unity/loader machinery — decided from bytes**: the `/web-demo` Nuxt route
+  component (`_nuxt/B9hgXP_e.js`) is the app's own page code; the Unity loader
+  (`unity-demo/Build/webBuild.loader.js`) is Unity's generated loader (it carries the
+  `[UnityCache]`/`unityFramework`/`wasmFileSize`/`streamingAssetsUrl` build plumbing)
+  — i.e. the "Unity wrapper machinery" the fleet treats as vendor engine code
+  (dino-survival / istanbul-streets / pixshard / sniper-dinosaurs all index their
+  `Build/*.loader.js` wholeFile, never sliced or rewritten). The loader's slices are
+  kept (the audit's 5/5 src↔pretty round-trip baseline is not weakened), but the
+  loader's identifiers are **not renamed** (vendor rule: deobfuscation applies to app
+  code only). The framework + the five shell chunks stay wholeFile; the loader's
+  wrapper head/tail stay index-only.
+- **Structure probe (from bytes, `tools/probe-structure.mjs`)**: **0**
+  `sourceMappingURL` occurrences and **0** `*.map` files across the capture, so no
+  original tree can be reconstructed from maps; the derivation stays a
+  prettier/slice pass. The app chunk is a flat compiled ESM module (2 from-imports,
+  1 export table) — no IIFE, no factory table — so the statement-aligned slices are
+  the real shape and the (ag)/(ah) whole-program-IIFE re-rooting correctly does
+  nothing.
+- **Rename campaign (PLAN §5) — applied and gated**: the finding that shaped the
+  campaign is that the reachable app surface is **genuinely tiny**. The `/web-demo`
+  route component is a compiled Vue SFC whose author-facing content is the template
+  strings; the compiler generated the short top-level bindings. `tools/names.json`
+  renames exactly those: the five static-node descriptors (`d`→`pageRootAttrs`,
+  `f`→`siteHeaderAttrs`, `p`→`headerInnerAttrs`, `m`→`siteFooterAttrs`,
+  `h`→`copyrightAttrs`, each named from its `class` string) and the component
+  definition (`g`→`webDemoPage`, from `__name: 'web-demo'`), plus the two `setup()`
+  locals (`_`→`siteUrlBase`, `v`→`pageUrl`) — **8 names, 17 identifier splices**,
+  recovered mechanically into `rename-map.json` (7 word-boundary + 1 indexed record
+  over 24,237 token positions) and re-applied by `tools/derive.mjs` on every re-cut.
+- **Recorded, honest exclusions (what could NOT be named)**:
+  - the **Unity loader body** — its whole body sits inside one top-level function
+    declaration (`createUnityInstance`), so the campaign's program-scope rule cannot
+    reach it (`node tools/apply-names.mjs --list` → `1 program-scope name, 0 ELIGIBLE,
+    1 refused`), and the vendor rule leaves Unity's generated loader unrenamed;
+  - the **import aliases** (`e,t,n,r,i,a,o,s,c,l,u`) — the compiled chunk's own import
+    bindings whose foreign export names (`A,D,H,k,kt,o,w,x,a,i,t`) are opaque vendor
+    exports; a token pass cannot rename an import alias together with its foreign
+    side safely, so they stay as bundled (a `names.json` review exclusion);
+  - the Unity payloads stay hashed `notRendered` (24 records) — never a rename
+    candidate.
+- **Guard family carried (all recorded fixes)**: marked `FunctionDeclaration`/
+  `ClassDeclaration` ids + token-level shorthand refusal at preflight (p); brace-depth
+  template-substitution scanning (r); strict outside-ranged refusal + per-source line
+  cache (s); the (t)(1) `renameBindings` record (the skipped `export { g as default }`
+  table is reached through it — this is why `g`'s single-target scoped record is also
+  written into `sources[].renameBindings`); the token-based import/export handling
+  (ab); per-chunk target uniqueness (ad); flat-occurrence counting on the base token
+  stream (af); canonical `record-manifest.mjs` SKIP/NOT_CAPTURED sets incl.
+  `rename-map.json` (u)/(t)(2). The `of`/`in` keyword guard (x) and the whole-program-
+  IIFE re-rooting guard (ag)/(ah) are carried: this capture is a flat module, so (ag)
+  re-roots nothing and the `of`/`in` guard has no rule to fire on. The labeled-statement
+  fix (aj) is present in the copied writer.
+- **Pipeline** `apply → recover → derive → gates`; the superseded pre-campaign
+  `readable/` + `src/` layers are archived under `legacy/2026-10-15/` (14 readable +
+  5 src + split-spec.json, 1.2 MB) — `rename-map.json`, `split-spec.json` and
+  `index-inline-map.json` regenerate in place (git is their history).
+- **Gates** (all green on 2026-10-15): `node tools/verify.mjs` → `34 files checked,
+  0 problems`; `node tools/audit.js` → `AUDIT PASS` (20 spec sections — 5/5
+  src↔pretty round-trips byte-exact **through the recorded rename map**, 1 renamed
+  slice, rename map 7 word-boundary + 1 indexed record token-validated, 13/13
+  pretties re-render byte-exact under pinned prettier 3.9.6); `node tools/verify-rename.mjs
+  --all` → `5/5 slice(s) reproduce byte-exact, 1 renamed slice(s), 2/2 chunk(s)
+  references+bindings YES`; `node tools/check-chunk.mjs --all` → `2 chunk(s), 5 slice
+  body(ies) substituted — all cross-slice calls resolve`; `node tools/derive.mjs`
+  re-run → all derived files byte-identical; `node tools/record-manifest.mjs --check`
+  → `34 files match the committed record`; `node tools/update.mjs` → `up to date: 34
+  captured files identical upstream`; serve probe on loopback → `/web-demo/`,
+  `/unity-demo/index.html`, the loader, the `.unityweb` payloads (gzip magic verified
+  over HTTP, no `Content-Encoding`), a shell chunk and the hero image all HTTP 200 at
+  their recorded sizes; listener killed, port proven closed (`netstat` shows no
+  LISTENER + connection refused).
 
 ## Mirror conventions
 
@@ -249,9 +361,18 @@ untouched — `node tools/verify.mjs` re-hashes all 34 files):
   streams (UnityWeb framing) exactly as served.
 - **Readable layer** — `readable/` is derived (prettified) and never shipped to
   a browser; it exists so the bundles, the loader and the Unity framework can
-  actually be read. Nothing is decompressed on disk beyond that layer.
+  actually be read. Nothing is decompressed on disk beyond that layer. It mirrors
+  the served path (nested dirs, no `__` flattening).
+- **Rename layer** — `rename-map.json` records the semantic renames applied to
+  `src/` (the route component's opaque compiler bindings → reviewed names);
+  `tools/derive.mjs` re-applies it on every re-cut, and `tools/audit.js` +
+  `tools/verify-rename.mjs` + `tools/check-chunk.mjs` re-prove it. A capture refresh
+  re-authors the campaign (`node tools/apply-names.mjs --list` for the preflight
+  verdicts) before the derived layers are re-cut — the map is valid for one build only.
+  The Unity loader is vendor machinery and is never renamed.
 - **Provenance** — `.upstream/manifest.json` records sha256 for each captured
-  artifact, and `tools/verify.mjs` re-checks it.
+  artifact, and `tools/verify.mjs` re-checks it; `tools/record-manifest.mjs` re-cuts
+  it with derived paths excluded.
 - **Drift** — `tools/update.mjs` is read-only: it reports what changed upstream
   and never rewrites the capture.
 
