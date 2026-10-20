@@ -168,6 +168,7 @@ node tools/audit.js                   # derived-layer + rename-map integrity gat
 node tools/record-manifest.mjs --check  # the committed manifest matches the capture walk
 node tools/verify-rename.mjs --all    # every slice reproduces byte-exact through rename-map.json
 node tools/check-chunk.mjs --all      # cross-slice calls still resolve after the rename
+node tools/check-exports.mjs          # the derived layer still exports every public name
 node tools/derive.mjs                 # re-cut readable/ + src/ + split-spec.json (byte-reproducible)
 ```
 
