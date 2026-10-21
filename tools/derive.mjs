@@ -182,6 +182,44 @@ function parses(text) {
   return { ok: r.status === 0, why: (r.stderr || "").trim().split("\n").slice(-3).join(" | ") };
 }
 
+// ── the SERVED CAPTURE's own export statement ───────────────────────────
+// An index-only tail records no `text`, so the frozen public-export gate has
+// no derived text for that table and falls back to the PRISTINE's own lines —
+// the file compared with itself, a comparison that can never fail, yet counted
+// as CHECKED. Recording the capture's own export statement on the tail makes
+// the two sides two DIFFERENT files.
+//
+// The statement is located by its PUBLIC-NAME SET (equal sets, not
+// positional), so a fragment of a string that happens to contain `export {`
+// is never mistaken for it, and the ORDER of the names does not matter.
+// When the capture carries no statement with that name set, NOTHING is
+// invented: the tail stays a plain index-only record and the gate keeps
+// reporting that table unchecked.
+function exportListNames(text) {
+  const out = new Set();
+  for (const m of String(text).matchAll(/\bexport\s*\{([^{}]*)\}/g)) {
+    for (let part of m[1].split(",")) {
+      part = part.trim();
+      if (!part) continue;
+      const as = part.split(/\s+as\s+/);
+      const pub = (as.length === 2 ? as[1] : as[0]).trim();
+      if (/^[A-Za-z_$][\w$]*$/.test(pub)) out.add(pub);
+    }
+  }
+  return out;
+}
+function captureExportStatement(captureText, want) {
+  if (!want || !want.size) return null;
+  let found = null;
+  for (const m of captureText.matchAll(/\bexport\s*\{([^{}]*)\}\s*;?/g)) {
+    const names = exportListNames(m[0]);
+    if (names.size !== want.size) continue;
+    if (![...want].every((n) => names.has(n))) continue;
+    found = m[0];
+  }
+  return found;
+}
+
 // ── markers for titles (top tokens, lowercase; fleet convention) ────────
 const STOP = new Set(
   ("function return typeof undefined object string number boolean prototype length value default " +
@@ -690,6 +728,41 @@ async function main() {
           ...(b.text ? { text: b.text } : {}),
         });
       }
+    }
+    // ── the READING-COPY shape: the capture is the PRISTINE ─────────────
+    // The chunk's export table is carried by TWO files: the capture as
+    // served, and the reading copy. The tail above records the CAPTURE's own
+    // statement as its `text`, so the frozen public-export gate compares the
+    // reading copy's rendering of that table with the capture's own bytes —
+    // two different files, never a file with itself. That record is a
+    // SNAPSHOT: a change to the served file alone (without a re-derive) is
+    // not caught by it.
+    //
+    // The reading-copy section is the LIVE link. It is a whole-file section
+    // whose `file` IS the reading copy and whose `origin` names the CAPTURE;
+    // it records NO `sourceFile`, because the reading copy IS the derived
+    // text and there is no slice to cut out of it. The gate then walks the
+    // CAPTURE as the pristine and the reading copy as the derived text, so a
+    // change to the served file IS caught.
+    //
+    // It carries `origin` and NOT `capture` on purpose: the gate rebinds a
+    // source's whole-file link to the section that names the SAME capture,
+    // and the source's pristine here is the reading copy — a `capture` field
+    // would make the gate compare the reading copy with itself.
+    if (exportSkip && exportSkip.text) {
+      sections.push({
+        file: sourceFile,
+        wholeFile: true,
+        origin: rel,
+        title: `${tag} — reading copy (whole-file)`,
+        desc:
+          `Lines 1-${lines.length} of ${sourceFile}. The reading copy of the served capture ${rel}: the PRISTINE the frozen ` +
+          `public-export gate reads is the capture itself and the DERIVED text is this reading copy, so the gate compares ` +
+          `the served file's own export table with the layer's — two different files, and the served file is read live.`,
+        note: "whole-file (reading-copy shape): the pristine is the captured chunk, the derived text is the readable pretty",
+        startLine: 1,
+        endLine: lines.length,
+      });
     }
     slicedTotal += nn;
     skippedTotal += perFileSkipped;

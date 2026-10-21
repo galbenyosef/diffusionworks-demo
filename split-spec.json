@@ -11,7 +11,7 @@
     "css": "parser css, no plugins",
     "json": "parser json, no plugins (inline importmap block)"
   },
-  "source": "readable/: 10 JS pretties (2 demo-glue file(s) sliced, 5 machinery/vendor wholeFile) + 2 CSS pretties; src/: 5 statement-aligned slices across 2 demo-glue file(s); 4 skipped section(s); 16 wholeFile section(s); capture: 34 files under .upstream/manifest.json; inline scan: unity-demo/index.html, web-demo/index.html; notRendered: 24 file/block record(s).",
+  "source": "readable/: 10 JS pretties (2 demo-glue file(s) sliced, 5 machinery/vendor wholeFile) + 2 CSS pretties; src/: 5 statement-aligned slices across 2 demo-glue file(s); 4 skipped section(s); 17 wholeFile section(s); capture: 34 files under .upstream/manifest.json; inline scan: unity-demo/index.html, web-demo/index.html; notRendered: 24 file/block record(s).",
   "inline": {
     "scanned": [
       "unity-demo/index.html",
@@ -324,12 +324,23 @@
       "file": "_nuxt/B9hgXP_e-tail-export.js",
       "skipped": true,
       "title": "_nuxt/B9hgXP_e — final export table (not sliced)",
-      "desc": "Lines 139-139. The chunk's final export {…} table — the exported bindings live in the earlier slices; a standalone tail carries no new statements, so it is indexed only.",
+      "desc": "Lines 139-139. The chunk's final export {…} table — the exported bindings live in the earlier slices; a standalone tail carries no new statements, so it is indexed only. Its recorded text is the SERVED CAPTURE's own export statement, so the public-export gate compares the capture's statement with the reading copy's rendering of it — two different files, not a file with itself.",
       "startLine": 139,
       "endLine": 139,
       "sourceFile": "readable/_nuxt/B9hgXP_e.pretty.js",
       "firstLine": "export { g as default };",
-      "lastLine": "export { g as default };"
+      "lastLine": "export { g as default };",
+      "text": "export{g as default};"
+    },
+    {
+      "file": "readable/_nuxt/B9hgXP_e.pretty.js",
+      "wholeFile": true,
+      "origin": "_nuxt/B9hgXP_e.js",
+      "title": "_nuxt/B9hgXP_e — reading copy (whole-file)",
+      "desc": "Lines 1-139 of readable/_nuxt/B9hgXP_e.pretty.js. The reading copy of the served capture _nuxt/B9hgXP_e.js: the PRISTINE the frozen public-export gate reads is the capture itself and the DERIVED text is this reading copy, so the gate compares the served file's own export table with the layer's — two different files, and the served file is read live.",
+      "note": "whole-file (reading-copy shape): the pristine is the captured chunk, the derived text is the readable pretty",
+      "startLine": 1,
+      "endLine": 139
     },
     {
       "file": "_nuxt/bBm2T0bl.js",
