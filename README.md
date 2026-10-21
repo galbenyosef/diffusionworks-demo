@@ -169,6 +169,7 @@ node tools/record-manifest.mjs --check  # the committed manifest matches the cap
 node tools/verify-rename.mjs --all    # every slice reproduces byte-exact through rename-map.json
 node tools/check-chunk.mjs --all      # cross-slice calls still resolve after the rename
 node tools/check-exports.mjs          # the derived layer still exports every public name
+node tools/derive.mjs --check          # the derived layer is current? (compares a fresh rebuild; writes NOTHING)
 node tools/derive.mjs                 # re-cut readable/ + src/ + split-spec.json (byte-reproducible)
 ```
 

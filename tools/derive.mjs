@@ -60,6 +60,18 @@ import crypto from "node:crypto";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { applyRecordedMap, recordCounts } from "./engine/rename-layer.mjs";
+// ── --check: prove the committed derived layer is current, writing NOTHING ─
+// This tool used to ignore its command line entirely, so `node tools/derive.mjs
+// --check` was a full in-place re-derivation: it rewrote readable/ + src/ +
+// split-spec.json and (on a mirror whose derive does not re-apply the recorded
+// rename map) stripped the rename layer off src/ -- damage that looks
+// legitimate, because the files still parse. --check now runs the mirror's
+// documented rebuild chain in a throwaway scratch copy OUTSIDE the mirror and
+// compares the result with the committed tree; it writes nothing here.
+if (process.argv.includes("--check")) {
+  const { runDeriveCheck } = await import("./derive-check.mjs");
+  process.exit(await runDeriveCheck());
+}
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const proj = path.resolve(here, "..");
@@ -536,12 +548,38 @@ async function main() {
       /^export\s*\{[\s\S]*\}\s*;?$/.test(lastStmt.text.trim()) &&
       !/\bfrom\b/.test(lastStmt.text)
     ) {
-      claim(stmts.length - 1, stmts.length - 1, {
-        kind: "skip",
-        file: `${tag}-tail-export.js`,
-        title: `${tag} — final export table (not sliced)`,
-        desc: `Lines ${lastStmt.startLine}-${lastStmt.endLine}. The chunk's final export {…} table — the exported bindings live in the earlier slices; a standalone tail carries no new statements, so it is indexed only.`,
-      });
+      // The tail's derived text: the SERVED CAPTURE's own export statement.
+      //
+      // An index-only tail records no `text`, so the frozen public-export
+      // gate has no derived text for that table and falls back to the
+      // PRISTINE's own lines — the file compared with itself, a comparison
+      // that can never fail, yet counted as CHECKED. Recording the capture's
+      // own statement instead makes the two sides two DIFFERENT files: the
+      // capture's raw statement and the reading copy's rendering of it.
+      //
+      // The statement is located by its PUBLIC-NAME SET (equal sets, not
+      // positional), so a fragment of a string that happens to contain
+      // `export {` is never mistaken for it. When the capture carries no
+      // statement with that name set, NOTHING is invented: the tail stays a
+      // plain index-only record and the gate keeps reporting it unchecked.
+      const tailNames = exportListNames(lastStmt.text);
+      const tailText = captureExportStatement(text, tailNames);
+      if (tailText) {
+        exportSkip = {
+          file: `${tag}-tail-export.js`,
+          title: `${tag} — final export table (not sliced)`,
+          desc: `Lines ${lastStmt.startLine}-${lastStmt.endLine}. The chunk's final export {…} table — the exported bindings live in the earlier slices; a standalone tail carries no new statements, so it is indexed only. Its recorded text is the SERVED CAPTURE's own export statement, so the public-export gate compares the capture's statement with the reading copy's rendering of it — two different files, not a file with itself.`,
+          text: tailText,
+        };
+        claim(stmts.length - 1, stmts.length - 1, { kind: "skip", ...exportSkip });
+      } else {
+        exportSkip = {
+          file: `${tag}-tail-export.js`,
+          title: `${tag} — final export table (not sliced)`,
+          desc: `Lines ${lastStmt.startLine}-${lastStmt.endLine}. The chunk's final export {…} table — the exported bindings live in the earlier slices; a standalone tail carries no new statements, so it is indexed only.`,
+        };
+        claim(stmts.length - 1, stmts.length - 1, { kind: "skip", ...exportSkip });
+      }
     }
 
     // runs of uncovered statements -> windows
@@ -646,6 +684,10 @@ async function main() {
           sourceFile,
           firstLine: lines[b.A - 1],
           lastLine: lines[b.B - 1],
+          // the served capture's own export statement (when the capture
+          // carries one with the tail's public-name set) — the derived text
+          // the public-export gate compares the reading copy's table against
+          ...(b.text ? { text: b.text } : {}),
         });
       }
     }
