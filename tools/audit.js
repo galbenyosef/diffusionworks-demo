@@ -238,6 +238,21 @@ function exportsOf(code) {
   return names;
 }
 
+// The PRISTINE a whole-file READING-COPY section names: the capture the
+// reading copy was rendered from. The frozen public-export gate reads it in
+// `capture`/`source`/`origin`/`from`, or in `wholeFile` when that field is a
+// path. A `title`/`note`/`desc` in PROSE is NOT accepted: the gate's prose
+// fallback is a last resort, and a provenance record a gate may only find by
+// reading a sentence is not a provenance record.
+const readingCopyCapture = (s) => {
+  if (!s || s.wholeFile !== true) return null;
+  if (typeof s.wholeFile === "string" && s.wholeFile) return s.wholeFile;
+  for (const f of ["capture", "source", "origin", "from"]) {
+    if (typeof s[f] === "string" && s[f]) return s[f];
+  }
+  return null;
+};
+
 // ── capture manifest ────────────────────────────────────────────────────
 let manifest = null;
 try {
@@ -357,6 +372,7 @@ const recordFor = (file) => {
 const seen = new Set();
 const rangedFiles = new Set();
 const indexOnlyFiles = new Set();
+const readingCopySections = [];
 for (const s of sections) {
   if (!s.file) {
     problem("split-spec section without a file");
@@ -369,11 +385,121 @@ for (const s of sections) {
   if (isWhole && isSkipped) problem(`section ${s.file}: both wholeFile and skipped`);
   if (typeof s.startLine !== "number" || typeof s.endLine !== "number")
     problem(`section ${s.file}: no startLine/endLine range recorded`);
-  if (typeof s.sourceFile !== "string") problem(`section ${s.file}: no sourceFile provenance recorded`);
+  if (typeof s.sourceFile !== "string") {
+    // A whole-file section in the READING-COPY shape: its `file` IS the
+    // derived text (a readable pretty) and it names the PRISTINE it was
+    // rendered from. There is no src slice to cut out of it, so it records no
+    // `sourceFile` — this is the shape the frozen public-export gate reads.
+    // It is accepted only when the shape is SOUND (verified below); a section
+    // that is neither shape is rejected exactly as before.
+    const cap = readingCopyCapture(s);
+    if (!cap) problem(`section ${s.file}: no sourceFile provenance recorded`);
+    else readingCopySections.push({ s, capture: cap });
+  }
   if (isWhole || isSkipped) indexOnlyFiles.add(s.file);
   else rangedFiles.add(s.file);
 }
 if (!rangedFiles.size) problem("no ranged src slices in split-spec.json (no reversed layer)");
+
+// The frozen public-export gate reaches a whole-file section in either of two
+// ways:
+//
+//   { "file": "readable/foo.pretty.js", "wholeFile": "capture/foo.js" }
+//   { "file": "readable/foo.pretty.js", "wholeFile": true, "origin": "capture/foo.js" }
+//
+// The PRISTINE is the capture; the DERIVED text is the reading copy. The two
+// resolve to different files, so the comparison the gate makes between them is
+// real — not a self-compare.
+//
+// Such a section records no `sourceFile`: the reading copy IS the derived
+// text, and there is no slice to cut out of it. The rule above (every section
+// names the pretty it was cut from) was written for a spec whose whole-file
+// sections meant "the capture, indexed whole" — a different thing, and both
+// are legitimate. This carve-out accepts the reading-copy shape only when the
+// shape is SOUND, so nothing is let through that the old rule would have
+// caught:
+//
+//   - the reading copy exists on disk, and it is the pretty of THAT capture
+//     under the mirror's own served-path naming rule;
+//   - the capture exists on disk, and it is a captured file: .upstream/
+//     manifest.json records it, byte for byte;
+//   - the two are DIFFERENT files — different paths, and not byte-identical
+//     (a copy of the capture would make the comparison a self-compare, which
+//     can only ever pass and proves nothing about the layer);
+//   - both carry an export table, and the two tables are the SAME public
+//     surface: no public export name of the capture is missing from the
+//     reading copy, and the reading copy exports no name the capture does
+//     not.
+let readingCopyOK = 0;
+for (const { s, capture } of readingCopySections) {
+  const label = `section ${s.file}`;
+  const copyRel = String(s.file);
+  const copyAbs = path.join(proj, copyRel);
+  if (!fs.existsSync(copyAbs) || !fs.statSync(copyAbs).isFile()) {
+    problem(`${label}: the reading copy is missing on disk: ${copyRel}`);
+    continue;
+  }
+  // the recorded range must fit the reading copy it describes
+  const copyLines = getLines(copyAbs).length;
+  if (
+    !Number.isInteger(s.startLine) ||
+    !Number.isInteger(s.endLine) ||
+    s.startLine < 1 ||
+    s.endLine < s.startLine ||
+    s.endLine > copyLines
+  ) {
+    problem(`${label}: bad range ${s.startLine}-${s.endLine} vs ${copyRel} (${copyLines} lines)`);
+    continue;
+  }
+  const capRel = String(capture);
+  const capAbs = path.join(proj, capRel);
+  if (!fs.existsSync(capAbs) || !fs.statSync(capAbs).isFile()) {
+    problem(`${label}: the capture is missing on disk: ${capRel}`);
+    continue;
+  }
+  if (!manifest?.files?.[capRel]) {
+    problem(`${label}: the capture ${capRel} is not a captured file (.upstream/manifest.json)`);
+    continue;
+  }
+  const capBuf = fs.readFileSync(capAbs);
+  if (sha256(capBuf) !== manifest.files[capRel].sha256) {
+    problem(`${label}: the capture ${capRel} does not match .upstream/manifest.json`);
+    continue;
+  }
+  // the mirror's own naming rule ties the reading copy to THAT capture
+  const want = prettyNameOf(capRel);
+  if (want !== copyRel) {
+    problem(`${label}: naming rule maps ${capRel} to ${want}`);
+    continue;
+  }
+  // the two must be DIFFERENT files
+  if (path.resolve(capAbs) === path.resolve(copyAbs) || capBuf.equals(fs.readFileSync(copyAbs))) {
+    problem(`${label}: the reading copy IS its capture (${capRel}) — a self-compare proves nothing`);
+    continue;
+  }
+  // the export tables must be comparable
+  const capNames = exportsOf(capBuf.toString("utf8"));
+  const copyNames = exportsOf(fs.readFileSync(copyAbs, "utf8"));
+  if (!capNames.size) {
+    problem(`${label}: the capture ${capRel} carries no export table — there is nothing to compare`);
+    continue;
+  }
+  if (!copyNames.size) {
+    problem(`${label}: the reading copy ${copyRel} carries no export table`);
+    continue;
+  }
+  const lost = [...capNames].filter((n) => !copyNames.has(n));
+  if (lost.length) {
+    problem(`${label}: a public export name of ${capRel} is missing from the reading copy: ${lost.join(", ")}`);
+    continue;
+  }
+  const gained = [...copyNames].filter((n) => !capNames.has(n));
+  if (gained.length) {
+    problem(`${label}: the reading copy exports a name ${capRel} does not: ${gained.join(", ")}`);
+    continue;
+  }
+  readingCopyOK++;
+}
 
 // src/ mirrors the served tree, so the walk is recursive; names are repo-relative
 const walkJs = (dir) => {
@@ -619,12 +745,17 @@ if (manifest) {
 }
 
 // ── machinery rule: wholeFile sections carry the recorded shape ─────────
+// The machinery chunk's whole-file section is recorded TWICE (see tools/derive.mjs):
+// the TILING section (its text is the CAPTURE) and the READING-COPY section
+// (its text is the readable pretty, its pristine is the capture). The guards
+// below are keyed by the CAPTURE path — the tiling section's `file` — and the
+// reading-copy twin is required alongside it.
 const MACHINERY_GUARDS = [
-  ["_nuxt/l-4XETKm-vendor.js", /__vite__mapDeps/, /NUXT_E1009/],
-  ["_nuxt/A3EUxX58-vendor.js", /captureStackTrace/, /extends Error/],
-  ["_nuxt/Buq_OoVt-vendor.js", /MathMLElement/, /querySelector/],
-  ["_nuxt/bBm2T0bl-vendor.js", /encodeURI/, /%5e/],
-  ["_nuxt/c0TEtrJJ-vendor.js", /A3EUxX58\.js/, /bBm2T0bl\.js/],
+  ["_nuxt/l-4XETKm.js", /__vite__mapDeps/, /NUXT_E1009/],
+  ["_nuxt/A3EUxX58.js", /captureStackTrace/, /extends Error/],
+  ["_nuxt/Buq_OoVt.js", /MathMLElement/, /querySelector/],
+  ["_nuxt/bBm2T0bl.js", /encodeURI/, /%5e/],
+  ["_nuxt/c0TEtrJJ.js", /A3EUxX58\.js/, /bBm2T0bl\.js/],
 ];
 for (const [file, reA, reB] of MACHINERY_GUARDS) {
   const sec = sections.find((s) => s.file === file);
@@ -636,10 +767,29 @@ for (const [file, reA, reB] of MACHINERY_GUARDS) {
     problem(`machinery section ${file} is not wholeFile`);
     continue;
   }
+  if (sec.capture !== file) {
+    problem(`machinery section ${file}: does not name the capture it was cut from`);
+    continue;
+  }
   const text = getLines(path.join(proj, sec.sourceFile))
     .slice(sec.startLine - 1, sec.endLine)
     .join("\n");
   if (!reA.test(text) || !reB.test(text)) problem(`machinery section ${file}: content guard failed — readable changed shape`);
+  // the READING-COPY twin: the pristine is the capture, the derived text is the
+  // readable pretty. It is the shape the frozen export gate reads, and without
+  // it the chunk's public export names are invisible to that gate.
+  const twin = sections.find((s) => s.wholeFile === true && s.file === sec.sourceFile);
+  if (!twin) {
+    problem(`machinery section ${file}: no reading-copy section for ${sec.sourceFile}`);
+    continue;
+  }
+  if (twin.origin !== file) {
+    problem(`reading-copy section ${twin.file}: does not name the capture ${file} as its pristine`);
+    continue;
+  }
+  if (typeof twin.sourceFile === "string") {
+    problem(`reading-copy section ${twin.file}: must not name a sourceFile (its file IS the derived text)`);
+  }
 }
 
 // ── Unity framework wholeFile guard + payload framing ──────────────────
@@ -852,6 +1002,7 @@ function loadPinnedPrettier() {
       `${checkOK}/${onDisk.length} src slices + ${prettyOK}/${prettyParsed} readable/*.pretty.js parse standalone (node --input-type=module --check -), ` +
       `${derivedOK}/${prettyFiles.length} pretties provably distinct from their capture source, ` +
       `${indexOnlyFiles.size} index-only wholeFile/skipped sections carry no src file, ` +
+      `${readingCopyOK}/${readingCopySections.length} whole-file reading copies re-verified against their capture (different files, same export surface), ` +
       `${inlineTwins} inline twin block(s) + ${inlineData} inline-data block(s) verified, ` +
       `${notRenderedOK} notRendered record(s) byte-verified, ` +
       `${resolvedImports}/${checkedImports} imports resolve inside the capture (${whitelisted} whitelisted machinery), ` +

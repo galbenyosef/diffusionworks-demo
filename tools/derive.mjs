@@ -405,15 +405,47 @@ async function main() {
       const region = pretty;
       if (cls.guard && !cls.guard(region))
         throw new Error(`${rel}: whole-file guard failed — readable changed shape`);
+      // The site-shell machinery chunk is never sliced, so its whole-file
+      // section is the ONLY record of it — and the frozen public-export gate
+      // reads that record in two shapes. It is recorded TWICE:
+      //
+      //   1. the TILING section — the source is the readable pretty and its
+      //      TEXT is the CAPTURE: the capture is the only other file that
+      //      carries this chunk's export table, so it is what the gate
+      //      compares the pretty's public names against (a self-compare
+      //      proves nothing);
+      //   2. the READING-COPY section — the PRISTINE is the captured chunk and
+      //      the derived text is the readable pretty, so the gate reads the
+      //      capture's export table and checks it against the layer.
+      //
+      // With one section the chunk's public names are INVISIBLE to the gate:
+      // the pretty is walked as the pristine, finds no derived text of its own
+      // (it IS the only derived text this chunk has), and every table in it is
+      // reported NOT covered — unchecked, not proven intact.
       sections.push({
-        file: `${tag}-vendor.js`,
+        file: rel,
         wholeFile: true,
+        capture: rel,
         title: cls.title,
         desc: `Lines 1-${lines.length} of ${sourceFile}: ${cls.desc}`,
         note: "whole-file (site-shell machinery rule): indexed in readable/, never sliced",
         startLine: 1,
         endLine: lines.length,
         sourceFile,
+      });
+      sections.push({
+        file: sourceFile,
+        wholeFile: true,
+        origin: rel,
+        title: `${tag} — ${cls.what} (whole-file reading copy)`,
+        desc:
+          `Lines 1-${lines.length} of ${sourceFile}. The captured chunk ${rel} rendered whole: the reading copy is the ` +
+          `only derived text this chunk has (the site-shell machinery rule never slices it), so the export gate ` +
+          `compares the capture's public names with it.`,
+        note:
+          "whole-file (site-shell machinery rule): the pristine is the captured chunk, the derived text is the readable pretty",
+        startLine: 1,
+        endLine: lines.length,
       });
       sources.push({
         sourceFile,
@@ -864,6 +896,16 @@ async function main() {
   const spec = {
     project: "diffusionworks-demo",
     kind: "statement-aligned-slices",
+    coverageNote:
+      "Export-name gate coverage (tools/check-exports.mjs). Every ES export table this capture carries is " +
+      "reached by the gate. The site-shell machinery chunks are never sliced — the vendor rule indexes them " +
+      "whole in readable/ — so each is recorded TWICE: the tiling section (its text is the CAPTURE, so the " +
+      "readable pretty's public names are checked against the capture's) and the reading-copy section (its " +
+      "pristine is the CAPTURE and its text is the readable pretty, so the capture's export table is checked " +
+      "against the layer). Both are comparisons between two DIFFERENT files — a self-compare would prove " +
+      "nothing — so a public export name changed in a served capture is reported LOST by name. The demo-glue " +
+      "chunk's own export table is reached through its skipped tail, rebuilt with the recorded renameBindings; " +
+      "the Unity framework and the CSS/inline blocks carry no ES module export surface at all.",
     ...(sources.some((s) => s.slicing === "function-body")
       ? {
           slicingContext:
@@ -963,6 +1005,9 @@ async function main() {
   let bad = 0;
   const bySource = new Map();
   for (const s of sections) {
+    // a READING-COPY section names no sourceFile: its `file` IS the derived
+    // text (the readable pretty), so it has no line range to tile.
+    if (!s.sourceFile) continue;
     if (!bySource.has(s.sourceFile)) bySource.set(s.sourceFile, []);
     bySource.get(s.sourceFile).push(s);
   }

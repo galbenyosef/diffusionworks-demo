@@ -1,6 +1,7 @@
 {
   "project": "diffusionworks-demo",
   "kind": "statement-aligned-slices",
+  "coverageNote": "Export-name gate coverage (tools/check-exports.mjs). Every ES export table this capture carries is reached by the gate. The site-shell machinery chunks are never sliced — the vendor rule indexes them whole in readable/ — so each is recorded TWICE: the tiling section (its text is the CAPTURE, so the readable pretty's public names are checked against the capture's) and the reading-copy section (its pristine is the CAPTURE and its text is the readable pretty, so the capture's export table is checked against the layer). Both are comparisons between two DIFFERENT files — a self-compare would prove nothing — so a public export name changed in a served capture is reported LOST by name. The demo-glue chunk's own export table is reached through its skipped tail, rebuilt with the recorded renameBindings; the Unity framework and the CSS/inline blocks carry no ES module export surface at all.",
   "slicingContext": "unity-demo/Build/webBuild.loader.js is a single top-level function declaration (createUnityInstance) covering the whole file — its slices descend one level into that function body and cut at ITS top-level statement boundaries; the wrapper head line, the final body-level `return` statement (a bare return is illegal outside a function) and the closing brace are skipped (index-only) sections",
   "defaultFile": "src/unity-demo/Build/webBuild.loader-01.js",
   "note": "Ultimate Water 2D Web Demo (https://diffusionworks.com/web-demo) is capture-class: a route page of a closed product site wrapping a Unity WebGL build at /unity-demo/. §0.4 fork-over-mirror was checked on 2026-10-13 — the product site publishes deployments, not sources, and no public upstream repo exists for this demo (GitHub search finds only this mirror's own repo), so the mirror stands. SCOPE: the DEMO's closure only — the Nuxt shell bits needed to boot the demo page plus the Unity WebGL build; other site routes (docs/support/privacy/...) are deliberately not captured. Derived pipeline: capture → pinned prettier 3.9.6 (module API, default options, single pass verified idempotent — never the CLI: it respects .gitignore and can silently echo its input) → readable/<served path>.pretty.js|css per captured JS/CSS file; the capture preserves the served URL structure, so the derived layers MIRROR it — nested directories and the served filenames kept, no __ flattening (taipei-rush-tokyo precedent, PLAN §5); every pretty provably NOT byte-identical to its capture source. The Unity framework (unity-demo/Build/webBuild.framework.js.unityweb) is a gzip stream as served: it is decompressed IN MEMORY (never stored decompressed) and prettified to readable/unity-demo/Build/webBuild.framework.js.pretty.js. src/: statement-aligned slices of the demo's own glue — unity-demo/Build/webBuild.loader.js (the Unity loader: download, progress, in-JS gzip inflate of the .unityweb payloads) and _nuxt/B9hgXP_e.js (the /web-demo route component): top-level declaration boundaries only, ~250-350 line windows, oversized single declarations stay whole, exact 2-line provenance header, each slice parses standalone under `node --input-type=module --check -` and round-trips byte-exact to its recorded readable line range (through the recorded semantic rename map where one is recorded). Site-shell machinery rule — wholeFile sections, never sliced: _nuxt/l-4XETKm.js (Nuxt entry boot), _nuxt/A3EUxX58.js (Nuxt/Vue vendor bundle), _nuxt/Buq_OoVt.js, _nuxt/bBm2T0bl.js, _nuxt/c0TEtrJJ.js (Nuxt utilities/glue) and the Unity framework region — product-framework code, not demo code. Vendor payload rule — notRendered with bytes + sha256: webBuild.data.unityweb and webBuild.wasm.unityweb are UnityWeb gzip streams stored exactly as served (Unity's loader inflates them in JS; no Content-Encoding on the wire), plus the seven Inter woff2 subsets, every image/ico and the two recorded JSON build files. Inline scan: web-demo/index.html carries an importmap block (json twin), the __NUXT__ boot script (js twin) and a typed Nuxt data block (inline-data notRendered); unity-demo/index.html carries the Unity template boot script (js twin). Identifiers in src/ carry the semantic rename campaign (PLAN §5) to the extent the bytes allow: the app's own /web-demo Nuxt route component is renamed (tools/names.json -> tools/apply-names.mjs -> rename-map.json, recovered by tools/recover-scoped-map.mjs and re-applied here on every re-cut); the Unity loader is Unity's generated loader machinery whose whole body sits inside one top-level function declaration, so the campaign's program-scope rule cannot reach it and the vendor rule leaves it unrenamed (recorded honestly in README.md, not claimed). Capture bytes are untouched by everything above; re-cut with `node tools/derive.mjs` after any capture refresh. `node tools/audit.js` is the gate.",
@@ -10,7 +11,7 @@
     "css": "parser css, no plugins",
     "json": "parser json, no plugins (inline importmap block)"
   },
-  "source": "readable/: 10 JS pretties (2 demo-glue file(s) sliced, 5 machinery/vendor wholeFile) + 2 CSS pretties; src/: 5 statement-aligned slices across 2 demo-glue file(s); 4 skipped section(s); 11 wholeFile section(s); capture: 34 files under .upstream/manifest.json; inline scan: unity-demo/index.html, web-demo/index.html; notRendered: 24 file/block record(s).",
+  "source": "readable/: 10 JS pretties (2 demo-glue file(s) sliced, 5 machinery/vendor wholeFile) + 2 CSS pretties; src/: 5 statement-aligned slices across 2 demo-glue file(s); 4 skipped section(s); 16 wholeFile section(s); capture: 34 files under .upstream/manifest.json; inline scan: unity-demo/index.html, web-demo/index.html; notRendered: 24 file/block record(s).",
   "inline": {
     "scanned": [
       "unity-demo/index.html",
@@ -291,14 +292,25 @@
       "lastLine": "}"
     },
     {
-      "file": "_nuxt/A3EUxX58-vendor.js",
+      "file": "_nuxt/A3EUxX58.js",
       "wholeFile": true,
+      "capture": "_nuxt/A3EUxX58.js",
       "title": "_nuxt/A3EUxX58.js — Nuxt/Vue vendor bundle (site-shell machinery, whole-file, never sliced)",
       "desc": "Lines 1-5359 of readable/_nuxt/A3EUxX58.pretty.js: The shared vendor bundle of the Nuxt build (error classes with code/docs/fix metadata, reactivity and DOM helpers, the modulepreload graph the route chunks import from). Product-site framework machinery, not demo code — indexed whole-file in readable/, never sliced.",
       "note": "whole-file (site-shell machinery rule): indexed in readable/, never sliced",
       "startLine": 1,
       "endLine": 5359,
       "sourceFile": "readable/_nuxt/A3EUxX58.pretty.js"
+    },
+    {
+      "file": "readable/_nuxt/A3EUxX58.pretty.js",
+      "wholeFile": true,
+      "origin": "_nuxt/A3EUxX58.js",
+      "title": "_nuxt/A3EUxX58 — Nuxt/Vue vendor bundle (site-shell machinery) (whole-file reading copy)",
+      "desc": "Lines 1-5359 of readable/_nuxt/A3EUxX58.pretty.js. The captured chunk _nuxt/A3EUxX58.js rendered whole: the reading copy is the only derived text this chunk has (the site-shell machinery rule never slices it), so the export gate compares the capture's public names with it.",
+      "note": "whole-file (site-shell machinery rule): the pristine is the captured chunk, the derived text is the readable pretty",
+      "startLine": 1,
+      "endLine": 5359
     },
     {
       "file": "_nuxt/B9hgXP_e-01.js",
@@ -320,8 +332,9 @@
       "lastLine": "export { g as default };"
     },
     {
-      "file": "_nuxt/bBm2T0bl-vendor.js",
+      "file": "_nuxt/bBm2T0bl.js",
       "wholeFile": true,
+      "capture": "_nuxt/bBm2T0bl.js",
       "title": "_nuxt/bBm2T0bl.js — Nuxt encoding utilities (site-shell machinery, whole-file, never sliced)",
       "desc": "Lines 1-256 of readable/_nuxt/bBm2T0bl.pretty.js: Nuxt encoding utility chunk (URI escape/unescape tables used by the router and fetch layers). Product-site framework machinery, not demo code — indexed whole-file in readable/, never sliced.",
       "note": "whole-file (site-shell machinery rule): indexed in readable/, never sliced",
@@ -330,8 +343,19 @@
       "sourceFile": "readable/_nuxt/bBm2T0bl.pretty.js"
     },
     {
-      "file": "_nuxt/Buq_OoVt-vendor.js",
+      "file": "readable/_nuxt/bBm2T0bl.pretty.js",
       "wholeFile": true,
+      "origin": "_nuxt/bBm2T0bl.js",
+      "title": "_nuxt/bBm2T0bl — Nuxt encoding utilities (site-shell machinery) (whole-file reading copy)",
+      "desc": "Lines 1-256 of readable/_nuxt/bBm2T0bl.pretty.js. The captured chunk _nuxt/bBm2T0bl.js rendered whole: the reading copy is the only derived text this chunk has (the site-shell machinery rule never slices it), so the export gate compares the capture's public names with it.",
+      "note": "whole-file (site-shell machinery rule): the pristine is the captured chunk, the derived text is the readable pretty",
+      "startLine": 1,
+      "endLine": 256
+    },
+    {
+      "file": "_nuxt/Buq_OoVt.js",
+      "wholeFile": true,
+      "capture": "_nuxt/Buq_OoVt.js",
       "title": "_nuxt/Buq_OoVt.js — Nuxt DOM/router utilities (site-shell machinery, whole-file, never sliced)",
       "desc": "Lines 1-733 of readable/_nuxt/Buq_OoVt.pretty.js: Nuxt utility chunk: DOM query helpers (MathMLElement handling) used by the site shell's navigation and route components. Product-site framework machinery, not demo code — indexed whole-file in readable/, never sliced.",
       "note": "whole-file (site-shell machinery rule): indexed in readable/, never sliced",
@@ -340,8 +364,19 @@
       "sourceFile": "readable/_nuxt/Buq_OoVt.pretty.js"
     },
     {
-      "file": "_nuxt/c0TEtrJJ-vendor.js",
+      "file": "readable/_nuxt/Buq_OoVt.pretty.js",
       "wholeFile": true,
+      "origin": "_nuxt/Buq_OoVt.js",
+      "title": "_nuxt/Buq_OoVt — Nuxt DOM/router utilities (site-shell machinery) (whole-file reading copy)",
+      "desc": "Lines 1-733 of readable/_nuxt/Buq_OoVt.pretty.js. The captured chunk _nuxt/Buq_OoVt.js rendered whole: the reading copy is the only derived text this chunk has (the site-shell machinery rule never slices it), so the export gate compares the capture's public names with it.",
+      "note": "whole-file (site-shell machinery rule): the pristine is the captured chunk, the derived text is the readable pretty",
+      "startLine": 1,
+      "endLine": 733
+    },
+    {
+      "file": "_nuxt/c0TEtrJJ.js",
+      "wholeFile": true,
+      "capture": "_nuxt/c0TEtrJJ.js",
       "title": "_nuxt/c0TEtrJJ.js — Nuxt runtime glue (site-shell machinery, whole-file, never sliced)",
       "desc": "Lines 1-332 of readable/_nuxt/c0TEtrJJ.pretty.js: Nuxt runtime glue chunk (fetch/cookie/head helpers shared by the site shell and its route components). Product-site framework machinery, not demo code — indexed whole-file in readable/, never sliced.",
       "note": "whole-file (site-shell machinery rule): indexed in readable/, never sliced",
@@ -350,14 +385,35 @@
       "sourceFile": "readable/_nuxt/c0TEtrJJ.pretty.js"
     },
     {
-      "file": "_nuxt/l-4XETKm-vendor.js",
+      "file": "readable/_nuxt/c0TEtrJJ.pretty.js",
       "wholeFile": true,
+      "origin": "_nuxt/c0TEtrJJ.js",
+      "title": "_nuxt/c0TEtrJJ — Nuxt runtime glue (site-shell machinery) (whole-file reading copy)",
+      "desc": "Lines 1-332 of readable/_nuxt/c0TEtrJJ.pretty.js. The captured chunk _nuxt/c0TEtrJJ.js rendered whole: the reading copy is the only derived text this chunk has (the site-shell machinery rule never slices it), so the export gate compares the capture's public names with it.",
+      "note": "whole-file (site-shell machinery rule): the pristine is the captured chunk, the derived text is the readable pretty",
+      "startLine": 1,
+      "endLine": 332
+    },
+    {
+      "file": "_nuxt/l-4XETKm.js",
+      "wholeFile": true,
+      "capture": "_nuxt/l-4XETKm.js",
       "title": "_nuxt/l-4XETKm.js — Nuxt entry chunk (site-shell machinery, whole-file, never sliced)",
       "desc": "Lines 1-5413 of readable/_nuxt/l-4XETKm.pretty.js: The Nuxt/Vite entry chunk that boots the site shell: the `__vite__mapDeps` route-chunk table, the Nuxt app/plugin/router bootstrap and the exported `#entry` bindings the route components import. Product-site framework machinery, not demo code — indexed whole-file in readable/, never sliced.",
       "note": "whole-file (site-shell machinery rule): indexed in readable/, never sliced",
       "startLine": 1,
       "endLine": 5413,
       "sourceFile": "readable/_nuxt/l-4XETKm.pretty.js"
+    },
+    {
+      "file": "readable/_nuxt/l-4XETKm.pretty.js",
+      "wholeFile": true,
+      "origin": "_nuxt/l-4XETKm.js",
+      "title": "_nuxt/l-4XETKm — Nuxt entry chunk (site-shell machinery) (whole-file reading copy)",
+      "desc": "Lines 1-5413 of readable/_nuxt/l-4XETKm.pretty.js. The captured chunk _nuxt/l-4XETKm.js rendered whole: the reading copy is the only derived text this chunk has (the site-shell machinery rule never slices it), so the export gate compares the capture's public names with it.",
+      "note": "whole-file (site-shell machinery rule): the pristine is the captured chunk, the derived text is the readable pretty",
+      "startLine": 1,
+      "endLine": 5413
     },
     {
       "file": "unity-demo/Build/webBuild.framework.js.vendor.js",

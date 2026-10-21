@@ -172,6 +172,27 @@ node tools/check-exports.mjs          # the derived layer still exports every pu
 node tools/derive.mjs                 # re-cut readable/ + src/ + split-spec.json (byte-reproducible)
 ```
 
+### What `check-exports.mjs` reaches here
+
+The gate compares the **public export names** of a pristine (the served capture) with
+the names the derived layer still exports. This mirror's site-shell machinery chunks
+(`_nuxt/l-4XETKm.js`, `_nuxt/A3EUxX58.js`, `_nuxt/Buq_OoVt.js`, `_nuxt/bBm2T0bl.js`,
+`_nuxt/c0TEtrJJ.js`) are never sliced — the vendor rule indexes them whole in
+`readable/` — so each one is recorded **twice** in `split-spec.json`, in the two
+shapes the gate reads:
+
+- the **tiling** section — its text is the **capture**, so the gate compares the
+  readable pretty's public names against the capture's (a self-compare would prove
+  nothing);
+- the **reading-copy** section — its pristine is the **capture** and its text is the
+  **readable pretty**, so the gate reads the capture's export table and checks it
+  against the layer.
+
+Both are live comparisons between two different files, so a public name changed in
+the served capture is reported LOST by name. `tools/audit.js` re-verifies every
+reading copy against its capture (different files, same export surface) — see the
+`5/5 whole-file reading copies re-verified` clause in its summary.
+
 ## Updating from upstream
 
 ```
@@ -342,10 +363,14 @@ section is entirely about `readable/`, `src/`, `split-spec.json`, `rename-map.js
   `rename-map.json`, `split-spec.json` and `index-inline-map.json` regenerate in
   place (git is their history).
 - **Gates** (all green on 2026-10-15): `node tools/verify.mjs` → `34 files checked,
-  0 problems`; `node tools/audit.js` → `AUDIT PASS` (20 spec sections — 5/5
+  0 problems`; `node tools/audit.js` → `AUDIT PASS` (25 spec sections — 5/5
   src↔pretty round-trips byte-exact **through the recorded rename map**, 1 renamed
   slice, rename map 7 word-boundary + 1 indexed record token-validated, 13/13
-  pretties re-render byte-exact under pinned prettier 3.9.6); `node tools/verify-rename.mjs
+  pretties re-render byte-exact under pinned prettier 3.9.6, 5/5 whole-file reading
+  copies re-verified against their capture); `node tools/check-exports.mjs` →
+  `11 export table(s) checked` (the five machinery chunks' public export tables are
+  reached through the capture ⇄ reading-copy pair — see *What `check-exports.mjs`
+  reaches here*); `node tools/verify-rename.mjs
   --all` → `5/5 slice(s) reproduce byte-exact, 1 renamed slice(s), 2/2 chunk(s)
   references+bindings YES`; `node tools/check-chunk.mjs --all` → `2 chunk(s), 5 slice
   body(ies) substituted — all cross-slice calls resolve`; `node tools/derive.mjs`
