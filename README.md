@@ -102,6 +102,14 @@ inlined; not used), and `web-demo/index.html` — the route is served bare at
   rule; the rollback path alongside git history)
 - `tools/derive.mjs` — rebuild `readable/` + `src/` + `split-spec.json`
 - `tools/audit.js` — integrity gate for the derived layers, incl. the rename map (`AUDIT PASS`)
+- `tools/check-links.mjs` — the export-binding link gate: does every export
+  table the layer carries name a binding the layer declares? The engine
+  (`node --input-type=module --check -`) is the judge. The Nuxt page chunk's
+  export table lives in a RECORDED TAIL (`split-spec.json` `sections[].text`),
+  not in a file on disk, and it is in the CAPTURE's spelling, so the gate
+  rewrites it into the layer's spelling with the recorded rename map before it
+  asks the engine. A table that names a binding a SIBLING slice declares is
+  a FRAGMENT, not a defect.
 - `tools/apply-names.mjs` + `tools/names.json` — the PLAN §5 campaign writer + reviewed worklist
 - `tools/recover-scoped-map.mjs` — recover `rename-map.json` from the committed slices
 - `tools/verify-rename.mjs` / `tools/check-chunk.mjs` / `tools/refcheck.mjs` — the campaign gates
@@ -169,6 +177,7 @@ node tools/record-manifest.mjs --check  # the committed manifest matches the cap
 node tools/verify-rename.mjs --all    # every slice reproduces byte-exact through rename-map.json
 node tools/check-chunk.mjs --all      # cross-slice calls still resolve after the rename
 node tools/check-exports.mjs          # the derived layer still exports every public name
+node tools/check-links.mjs            # every export table names a binding the layer declares (fragments are reported, breaks fail)
 node tools/derive.mjs --check          # the derived layer is current? (compares a fresh rebuild; writes NOTHING)
 node tools/derive.mjs                 # re-cut readable/ + src/ + split-spec.json (byte-reproducible)
 ```
