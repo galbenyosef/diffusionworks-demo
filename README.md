@@ -378,7 +378,7 @@ section is entirely about `readable/`, `src/`, `split-spec.json`, `rename-map.js
   slice, rename map 7 word-boundary + 1 indexed record token-validated, 13/13
   pretties re-render byte-exact under pinned prettier 3.9.6, 5/5 whole-file reading
   copies re-verified against their capture); `node tools/check-exports.mjs` →
-  `11 export table(s) checked` (the five machinery chunks' public export tables are
+  `12 export table(s) checked` (the five machinery chunks' public export tables are
   reached through the capture ⇄ reading-copy pair — see *What `check-exports.mjs`
   reaches here*); `node tools/verify-rename.mjs
   --all` → `5/5 slice(s) reproduce byte-exact, 1 renamed slice(s), 2/2 chunk(s)
