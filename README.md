@@ -203,6 +203,13 @@ the served capture is reported LOST by name. `tools/audit.js` re-verifies every
 reading copy against its capture (different files, same export surface) — see the
 `5/5 whole-file reading copies re-verified` clause in its summary.
 
+## Boot test (2026-10-27)
+
+- Entry: `http://127.0.0.1:4765/web-demo/` served by `tools/serve.mjs` with the network blocked (`MAP * 127.0.0.1`).
+- Outcome: **rendered** — the shell painted and the embedded Unity WebGL build booted to the lake scene, with "Use WASD to move" shown over gameplay.
+- Evidence: body 396 chars; canvas 1125x710 (inside `/unity-demo/` iframe); 0 console errors; 0 failed same-origin requests, 0 blocked cross-origin; screenshot `docs/boot-2026-10-27.png`.
+- Gaps seen: none.
+
 ## Updating from upstream
 
 ```
