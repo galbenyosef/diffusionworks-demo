@@ -1,0 +1,72 @@
+{
+  "census": "2026-11-01",
+  "origin": "https://diffusionworks.com",
+  "method": "quarantined-cache re-probe (Cache-Control: no-cache, no-store + Pragma, node fetch cache:'no-store'); two independent rounds, both 404; each path also re-probed WITHOUT a query string to rule out the hcdn query-handling artifact seen on /favicon.ico",
+  "note": "Superseded capture bytes are archived beside this record under legacy/2026-11-01/capture/ (replaced: web-demo/index.html and the rotating _nuxt/builds/latest.json pointer). The seven paths below are GONE upstream: the origin redeployed the Nuxt build (new buildId 5ad685dc-c9da-484c-a7c7-41f0cab32a2d) and the old content-hashed chunks/meta are no longer served.",
+  "upstreamGone": [
+    {
+      "path": "_nuxt/l-4XETKm.js",
+      "status": 404,
+      "oldBytes": 91700,
+      "oldSha256": "656e92726fb665b4591159c9555fa3010093fd41293c1f60aaf8e010164a246c",
+      "role": "Nuxt entry boot chunk (superseded by _nuxt/DbK2IZpp.js)"
+    },
+    {
+      "path": "_nuxt/A3EUxX58.js",
+      "status": 404,
+      "oldBytes": 80780,
+      "oldSha256": "5d2a6133fe948b7458f2209791cb1c25badda65e77c1cf874ce2de1f9ffe3374",
+      "role": "Nuxt/Vue vendor bundle (superseded by _nuxt/CYlFAcRp.js)"
+    },
+    {
+      "path": "_nuxt/Buq_OoVt.js",
+      "status": 404,
+      "oldBytes": 12555,
+      "oldSha256": "e691e4f5f1ce40511397b40b73ec4b1c06369ba25c0243716d6e159550c2cdc4",
+      "role": "Nuxt DOM/router utilities (superseded by _nuxt/RQNnV-So.js)"
+    },
+    {
+      "path": "_nuxt/c0TEtrJJ.js",
+      "status": 404,
+      "oldBytes": 5580,
+      "oldSha256": "e9f68055de17278cbb965dd8101a9b0872d368c851ca832b99eeee6527135fef",
+      "role": "Nuxt runtime glue (superseded by _nuxt/B5MPRCs6.js)"
+    },
+    {
+      "path": "_nuxt/B9hgXP_e.js",
+      "status": 404,
+      "oldBytes": 2435,
+      "oldSha256": "7f0bfff88909e3492b2cd6f4f3f5e6c05cedefc04c305d3702fd610f91427cd1",
+      "role": "/web-demo route component chunk (superseded by _nuxt/CSNGdBb4.js)"
+    },
+    {
+      "path": "_nuxt/entry.BnxCdEeO.css",
+      "status": 404,
+      "oldBytes": 48690,
+      "oldSha256": "3b14c28d656d5b103968932151fcbb059b8732e106d02cb110ca7d404f4cc426",
+      "role": "shell stylesheet (superseded by _nuxt/entry.DtG1u2qY.css)"
+    },
+    {
+      "path": "_nuxt/builds/meta/59b71471-88a1-4f73-ae77-d8743f470d65.json",
+      "status": 404,
+      "oldBytes": 88,
+      "oldSha256": "b0b3d9137a7f9c350453ca963e893e1bd51a6fc3045cee6fcfe9051eff4a524d",
+      "role": "Nuxt build meta for the superseded buildId (superseded by _nuxt/builds/meta/5ad685dc-c9da-484c-a7c7-41f0cab32a2d.json)"
+    }
+  ],
+  "replaced": [
+    {
+      "path": "web-demo/index.html",
+      "oldBytes": 3939,
+      "oldSha256": "9549591c5cfcc728615b8914c3651b849315c1b6b669b27a8eb02732aa57315f",
+      "newSha256": "db45c1c00eeb9defbca58c31a3de4f5f34a1c04e533e83ad3f538962e54e98ea",
+      "why": "the served route document now references /_nuxt/DbK2IZpp.js, /_nuxt/B5MPRCs6.js, /_nuxt/CSNGdBb4.js, /_nuxt/CYlFAcRp.js, /_nuxt/RQNnV-So.js and /_nuxt/entry.DtG1u2qY.css (only /_nuxt/bBm2T0bl.js is unchanged); page markup/text otherwise identical"
+    },
+    {
+      "path": "_nuxt/builds/latest.json",
+      "oldSha256": "0d43cd0854d5d7a450e956b1cfeccc040d2e57fd847cb140a30ec6184d50c3e8",
+      "newSha256": "60d2f3a45391dbfcdaf981977f2e5526d0e83cd46e3376bfa90c7ec256077cff",
+      "why": "rotating build pointer: id/timestamp only (buildId 59b71471-88a1-4f73-ae77-d8743f470d65 -> 5ad685dc-c9da-484c-a7c7-41f0cab32a2d). Archived for reversibility; excluded from the drift set per the fleet rotating-uuid rule."
+    }
+  ]
+}

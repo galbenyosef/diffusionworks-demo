@@ -28,7 +28,7 @@ const proj = path.resolve(here, "..");
 const check = process.argv.includes("--check");
 
 const SKIP = new Set([
-  ".git", ".upstream", "node_modules", "readable", "src", "docs", "tools", "legacy", ".work", ".scratch",
+  ".git", ".upstream", "node_modules", "readable", "src", "docs", "tools", "legacy", ".work", ".scratch", "tmp",
 ]);
 const NOT_CAPTURED = new Set([
   ".gitattributes",

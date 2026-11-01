@@ -751,11 +751,11 @@ if (manifest) {
 // below are keyed by the CAPTURE path — the tiling section's `file` — and the
 // reading-copy twin is required alongside it.
 const MACHINERY_GUARDS = [
-  ["_nuxt/l-4XETKm.js", /__vite__mapDeps/, /NUXT_E1009/],
-  ["_nuxt/A3EUxX58.js", /captureStackTrace/, /extends Error/],
-  ["_nuxt/Buq_OoVt.js", /MathMLElement/, /querySelector/],
+  ["_nuxt/DbK2IZpp.js", /__vite__mapDeps/, /NUXT_E1009/],
+  ["_nuxt/CYlFAcRp.js", /captureStackTrace/, /extends Error/],
+  ["_nuxt/RQNnV-So.js", /MathMLElement/, /querySelector/],
   ["_nuxt/bBm2T0bl.js", /encodeURI/, /%5e/],
-  ["_nuxt/c0TEtrJJ.js", /A3EUxX58\.js/, /bBm2T0bl\.js/],
+  ["_nuxt/B5MPRCs6.js", /CYlFAcRp\.js/, /bBm2T0bl\.js/],
 ];
 for (const [file, reA, reB] of MACHINERY_GUARDS) {
   const sec = sections.find((s) => s.file === file);

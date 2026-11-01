@@ -27,7 +27,7 @@
 //   byte-exact to its readable line range:
 //     - unity-demo/Build/webBuild.loader.js  (the Unity loader: download,
 //       progress, in-JS gzip inflate of the .unityweb payloads)
-//     - _nuxt/B9hgXP_e.js                    (the /web-demo route component)
+//     - _nuxt/CSNGdBb4.js                    (the /web-demo route component)
 //   payload/binary files (webBuild.data.unityweb, webBuild.wasm.unityweb, the
 //   seven Inter woff2 subsets, every image/ico) -> split-spec notRendered with
 //   bytes + sha256; the .unityweb payloads are UnityWeb gzip streams stored
@@ -322,8 +322,8 @@ function scanBlocks(buf) {
 // They are the product site's framework code, not demo code, and identifiers
 // are minified — indexed whole-file in readable/, never sliced.
 const WHOLE_FILE = {
-  "_nuxt/l-4XETKm": {
-    title: "_nuxt/l-4XETKm.js — Nuxt entry chunk (site-shell machinery, whole-file, never sliced)",
+  "_nuxt/DbK2IZpp": {
+    title: "_nuxt/DbK2IZpp.js — Nuxt entry chunk (site-shell machinery, whole-file, never sliced)",
     desc:
       "The Nuxt/Vite entry chunk that boots the site shell: the `__vite__mapDeps` route-chunk table, the " +
       "Nuxt app/plugin/router bootstrap and the exported `#entry` bindings the route components import. " +
@@ -331,8 +331,8 @@ const WHOLE_FILE = {
     guard: (t) => t.includes("__vite__mapDeps") && t.includes("NUXT_E1009"),
     what: "Nuxt entry chunk (site-shell machinery)",
   },
-  "_nuxt/A3EUxX58": {
-    title: "_nuxt/A3EUxX58.js — Nuxt/Vue vendor bundle (site-shell machinery, whole-file, never sliced)",
+  "_nuxt/CYlFAcRp": {
+    title: "_nuxt/CYlFAcRp.js — Nuxt/Vue vendor bundle (site-shell machinery, whole-file, never sliced)",
     desc:
       "The shared vendor bundle of the Nuxt build (error classes with code/docs/fix metadata, reactivity and " +
       "DOM helpers, the modulepreload graph the route chunks import from). Product-site framework machinery, " +
@@ -340,14 +340,23 @@ const WHOLE_FILE = {
     guard: (t) => t.includes("captureStackTrace") && t.includes("extends Error"),
     what: "Nuxt/Vue vendor bundle (site-shell machinery)",
   },
-  "_nuxt/Buq_OoVt": {
-    title: "_nuxt/Buq_OoVt.js — Nuxt DOM/router utilities (site-shell machinery, whole-file, never sliced)",
+  "_nuxt/RQNnV-So": {
+    title: "_nuxt/RQNnV-So.js — Nuxt DOM/router utilities (site-shell machinery, whole-file, never sliced)",
     desc:
-      "Nuxt utility chunk: DOM query helpers (MathMLElement handling) used by the site shell's navigation and " +
-      "route components. Product-site framework machinery, not demo code — indexed whole-file in readable/, " +
-      "never sliced.",
+      "Nuxt utility chunk: Vue's DOM renderer helpers (MathMLElement handling, trusted-types policy) used by " +
+      "the site shell's navigation and route components. Product-site framework machinery, not demo code — " +
+      "indexed whole-file in readable/, never sliced.",
     guard: (t) => t.includes("MathMLElement") && t.includes("querySelector"),
     what: "Nuxt DOM/router utilities (site-shell machinery)",
+  },
+  "_nuxt/B5MPRCs6": {
+    title: "_nuxt/B5MPRCs6.js — Nuxt runtime glue (site-shell machinery, whole-file, never sliced)",
+    desc:
+      "Nuxt runtime glue chunk (app-config merging and fetch/cookie/head helpers shared by the site shell " +
+      "and its route components). Product-site framework machinery, not demo code — indexed whole-file in " +
+      "readable/, never sliced.",
+    guard: (t) => t.includes("CYlFAcRp.js") && t.includes("bBm2T0bl.js"),
+    what: "Nuxt runtime glue (site-shell machinery)",
   },
   "_nuxt/bBm2T0bl": {
     title: "_nuxt/bBm2T0bl.js — Nuxt encoding utilities (site-shell machinery, whole-file, never sliced)",
@@ -356,14 +365,6 @@ const WHOLE_FILE = {
       "Product-site framework machinery, not demo code — indexed whole-file in readable/, never sliced.",
     guard: (t) => t.includes("encodeURI") && t.includes("%5e"),
     what: "Nuxt encoding utilities (site-shell machinery)",
-  },
-  "_nuxt/c0TEtrJJ": {
-    title: "_nuxt/c0TEtrJJ.js — Nuxt runtime glue (site-shell machinery, whole-file, never sliced)",
-    desc:
-      "Nuxt runtime glue chunk (fetch/cookie/head helpers shared by the site shell and its route components). " +
-      "Product-site framework machinery, not demo code — indexed whole-file in readable/, never sliced.",
-    guard: (t) => t.includes("A3EUxX58.js") && t.includes("bBm2T0bl.js"),
-    what: "Nuxt runtime glue (site-shell machinery)",
   },
 };
 
@@ -572,7 +573,7 @@ async function main() {
             desc: `Lines ${stmts[i].startLine}-${stmts[i].endLine}. The loader function's final \`return\` — a bare return is illegal outside a function, so this statement cannot stand alone; it is indexed only (see split-spec slicingContext).`,
           });
     }
-    if (tag === "_nuxt__B9hgXP_e") {
+    if (tag === "_nuxt/CSNGdBb4") {
       if (!/content-page web-demo-page/.test(pretty) || !/unity-demo\/index\.html/.test(pretty))
         throw new Error(`${rel}: web-demo route anchors missing — readable changed shape`);
     }
@@ -1048,13 +1049,13 @@ async function main() {
       "served: it is decompressed IN MEMORY (never stored decompressed) and prettified to " +
       "readable/unity-demo/Build/webBuild.framework.js.pretty.js. src/: statement-aligned slices of the " +
       "demo's own glue — unity-demo/Build/webBuild.loader.js (the Unity loader: download, progress, " +
-      "in-JS gzip inflate of the .unityweb payloads) and _nuxt/B9hgXP_e.js (the /web-demo route " +
+      "in-JS gzip inflate of the .unityweb payloads) and _nuxt/CSNGdBb4.js (the /web-demo route " +
       "component): top-level declaration boundaries only, ~250-350 line windows, oversized single " +
       "declarations stay whole, exact 2-line provenance header, each slice parses standalone under " +
       "`node --input-type=module --check -` and round-trips byte-exact to its recorded readable line range " +
       "(through the recorded semantic rename map where one is recorded). " +
-      "Site-shell machinery rule — wholeFile sections, never sliced: _nuxt/l-4XETKm.js (Nuxt entry boot), " +
-      "_nuxt/A3EUxX58.js (Nuxt/Vue vendor bundle), _nuxt/Buq_OoVt.js, _nuxt/bBm2T0bl.js, _nuxt/c0TEtrJJ.js " +
+      "Site-shell machinery rule — wholeFile sections, never sliced: _nuxt/DbK2IZpp.js (Nuxt entry boot), " +
+      "_nuxt/CYlFAcRp.js (Nuxt/Vue vendor bundle), _nuxt/RQNnV-So.js, _nuxt/bBm2T0bl.js, _nuxt/B5MPRCs6.js " +
       "(Nuxt utilities/glue) and the Unity framework region — product-framework code, not demo code. Vendor " +
       "payload rule — notRendered with bytes + sha256: webBuild.data.unityweb and webBuild.wasm.unityweb are " +
       "UnityWeb gzip streams stored exactly as served (Unity's loader inflates them in JS; no " +

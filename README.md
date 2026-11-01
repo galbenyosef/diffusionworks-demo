@@ -26,8 +26,8 @@ Source: https://diffusionworks.com/web-demo
   A static server must serve them byte-exact and must not add a `Content-Encoding`
   (that is why this mirror ships its own preview `tools/serve.mjs`).
 - **Nuxt 3 product-site shell for the one route** — the demo page is a Nuxt/Vite
-  SSR route: an importmap (`#entry` → `/_nuxt/l-4XETKm.js`), six boot chunks
-  (entry + modulepreload closure), `entry.BnxCdEeO.css`, Inter woff2 subsets, and an
+  SSR route: an importmap (`#entry` → `/_nuxt/DbK2IZpp.js`), six boot chunks
+  (entry + modulepreload closure), `entry.DtG1u2qY.css`, Inter woff2 subsets, and an
   `<iframe src="/unity-demo/index.html">` that carries the demo. The shell only
   frames the demo; the game is entirely the Unity build.
 - **Hostinger hcdn front** — content-negotiates WebP for images (browsers get
@@ -50,12 +50,12 @@ exactly what the demo page needs to boot plus the Unity build it embeds, and not
 else. The boundary is network-log-proven: while `/web-demo` boots and the demo runs,
 the page requests only the six shell chunks, the CSS, one font file, its own images
 and the whole `/unity-demo/` tree. The entry's `__vite__mapDeps` route table names
-the five booted chunks plus eight further lazy chunks (`ScEKgHkK`, `D0CFReFO`,
-`CZKwawUT`, `Bug7AP2i`, `Cy5Lpvs9`, `Cc91Ut1X`, `CFXZFARg`, `BQY1bykr`); **none of
+the five booted chunks plus eight further lazy chunks (`SG3tm0op`, `C8bGRWWE`,
+`iIq07QPN`, `Bv0f366M`, `4yJ4lH8-`, `cLjUeGLo`, `CqpLF6Ye`, `BnnOwHjy`); **none of
 the lazy eight is ever requested while the demo page boots** — they are other site
 routes' payloads and are deliberately not captured (product-site scope).
 
-Captured whole: **34 files, 38,479,123 bytes** (~36.7 MiB) — the Nuxt shell closure
+Captured whole: **34 files, 38,476,848 bytes** (~36.7 MiB) — the Nuxt shell closure
 for the route (entry document kept at `web-demo/index.html`), the page's images and
 fonts, and the Unity demo (`/unity-demo/`: index document, TemplateData, loader and
 the three `.unityweb` payloads). The page's own note says the first load is
@@ -66,7 +66,7 @@ network log contains no third-party host (two `blob:` URLs are the loader handin
 the decompressed framework to Unity and are internal). Because everything is
 first-party, an offline static server reproduces the demo exactly.
 
-Genuine 404s (probed 2026-10-13, documented gaps): `unity-demo/StreamingAssets`
+Genuine 404s (re-probed 2026-11-01, documented gaps): `unity-demo/StreamingAssets`
 (the build declares `streamingAssetsUrl` but ships no StreamingAssets tree),
 `unity-demo/Build/webBuild.loader.js.map`, `unity-demo/Build/webBuild.data` (the
 payload exists only in `.unityweb` form), `web-demo/_payload.json` (SSR data is
@@ -77,9 +77,9 @@ inlined; not used), and `web-demo/index.html` — the route is served bare at
 ## Layout
 
 - `web-demo/index.html` — the entry document, byte-exact as served at `/web-demo`
-- `_nuxt/` — the shell closure: entry chunk (`l-4XETKm.js`), the modulepreload
-  chunks (`A3EUxX58`, `Buq_OoVt`, `bBm2T0bl`, `c0TEtrJJ`), the route chunk
-  (`B9hgXP_e.js`), `entry.BnxCdEeO.css`, the seven Inter woff2 subsets,
+- `_nuxt/` — the shell closure: entry chunk (`DbK2IZpp.js`), the modulepreload
+  chunks (`CSNGdBb4` route component, `CYlFAcRp` vendor bundle, `B5MPRCs6`,
+  `RQNnV-So`, `bBm2T0bl`), `entry.DtG1u2qY.css`, the seven Inter woff2 subsets,
   `builds/latest.json` and `builds/meta/<buildId>.json`
 - `images/`, `brand/`, `favicon.png`, `favicon.ico`, `asset-store/` — the page
   imagery (hero, logo, icons, the demo's social card)
@@ -88,18 +88,22 @@ inlined; not used), and `web-demo/index.html` — the route is served bare at
 - `.upstream/manifest.json` — sha256 for every captured file (Gen-A)
 - `readable/` — prettified derived layer (pinned prettier 3.9.6), mirroring the
   served path (nested dirs, no `__` flattening): `readable/_nuxt/` (the six shell
-  chunks + `entry.BnxCdEeO.pretty.css`), `readable/unity-demo/Build/` (the Unity
+  chunks + `entry.DtG1u2qY.pretty.css`), `readable/unity-demo/Build/` (the Unity
   loader + the framework, gunzipped in memory, never stored decompressed),
   `readable/unity-demo/TemplateData/style.pretty.css` and the inline twin blocks
   under `readable/web-demo/` and `readable/unity-demo/`
 - `src/` + `split-spec.json` — 5 statement-aligned slices of the demo glue, mirroring
   the served path (`src/unity-demo/Build/webBuild.loader-0N.js` — the Unity loader's
-  function body — and `src/_nuxt/B9hgXP_e-01.js` — the `/web-demo` route component),
+  function body — and `src/_nuxt/CSNGdBb4-01.js` — the `/web-demo` route component),
   with the recorded derivation spec and the semantic rename layer
 - `rename-map.json` — the PLAN §5 campaign record (the app route component's opaque
   compiler bindings → reviewed names; re-applied by `derive.mjs` on every re-cut)
 - `legacy/2026-10-15/` — the superseded flat `readable/` + `src/` layers (archive-both
   rule; the rollback path alongside git history)
+- `legacy/2026-11-01/` — the 2026-11-01 drift refresh: the seven replaced/upstream-gone
+  capture files (old shell chunks, stylesheet and build meta), the replaced entry
+  document + rotating `latest.json` pointer, the superseded derived twin of each, and
+  `upstream-gone.json` (the 404 evidence + old sha256 per path)
 - `tools/derive.mjs` — rebuild `readable/` + `src/` + `split-spec.json`
 - `tools/audit.js` — integrity gate for the derived layers, incl. the rename map (`AUDIT PASS`)
 - `tools/check-links.mjs` — the export-binding link gate: does every export
@@ -121,8 +125,9 @@ inlined; not used), and `web-demo/index.html` — the route is served bare at
 - `tools/verify.mjs` — re-hash the capture against the manifest
 - `docs/cover.png` — cover (gameplay: the water sim mid-interaction — surface
   ripples around the float, the platform riding the waterline),
-  `docs/boot-2026-10-13.png` — boot evidence (the mirror serving `/web-demo/`,
-  demo rendered in the iframe), `docs/network-log-2026-10-13.jsonl` — the raw
+  `docs/boot-2026-10-13.png` + `docs/boot-2026-10-27.png` + `docs/boot-2026-11-01-refresh.png`
+  — boot evidence (the mirror serving `/web-demo/`, demo rendered in the iframe),
+  `docs/network-log-2026-10-13.jsonl` — the raw
   browser network log (the runtime-closure record)
 
 ## Assets
@@ -144,7 +149,7 @@ inlined; not used), and `web-demo/index.html` — the route is served bare at
 - **audio, models, data** — none as files: the demo's meshes, textures, sounds and
   scenes are compiled inside `webBuild.data.unityweb` (the payload is the asset
   container); the only other data files are the two Nuxt build JSONs under `_nuxt/builds/`
-- **stylesheets** — 2 file(s): `_nuxt/entry.BnxCdEeO.css`,
+- **stylesheets** — 2 file(s): `_nuxt/entry.DtG1u2qY.css`,
   `unity-demo/TemplateData/style.css`
 
 ## Run
@@ -186,8 +191,8 @@ node tools/derive.mjs                 # re-cut readable/ + src/ + split-spec.jso
 
 The gate compares the **public export names** of a pristine (the served capture) with
 the names the derived layer still exports. This mirror's site-shell machinery chunks
-(`_nuxt/l-4XETKm.js`, `_nuxt/A3EUxX58.js`, `_nuxt/Buq_OoVt.js`, `_nuxt/bBm2T0bl.js`,
-`_nuxt/c0TEtrJJ.js`) are never sliced — the vendor rule indexes them whole in
+(`_nuxt/DbK2IZpp.js`, `_nuxt/CYlFAcRp.js`, `_nuxt/RQNnV-So.js`, `_nuxt/bBm2T0bl.js`,
+`_nuxt/B5MPRCs6.js`) are never sliced — the vendor rule indexes them whole in
 `readable/` — so each one is recorded **twice** in `split-spec.json`, in the two
 shapes the gate reads:
 
@@ -201,7 +206,15 @@ shapes the gate reads:
 Both are live comparisons between two different files, so a public name changed in
 the served capture is reported LOST by name. `tools/audit.js` re-verifies every
 reading copy against its capture (different files, same export surface) — see the
-`5/5 whole-file reading copies re-verified` clause in its summary.
+`6/6 whole-file reading copies re-verified` clause in its summary.
+
+## Boot test (2026-11-01, after the drift refresh)
+
+- Entry: `http://127.0.0.1:4700/web-demo/` served by `tools/serve.mjs`, headless Chrome with `--host-resolver-rules="MAP * 127.0.0.1"` (every host name resolves to loopback; the port was proved free by connect before use).
+- Outcome: **rendered** — the shell painted and the embedded Unity WebGL build booted to the lake scene, with "Use ''WASD'' to move press J to Jump" shown over gameplay.
+- Evidence: canvas 1268x805 (inside the `/unity-demo/` iframe), WebGL context true; 26 requests, all first-party; framework + data payloads downloaded whole (78,297 B / 24,488,890 B); 0 console errors, 0 exceptions, 0 HTTP >= 400, 0 blocked cross-origin; 0 server-side 404s; screenshot `docs/boot-2026-11-01-refresh.png`.
+- One benign abort: Chrome reports `net::ERR_ABORTED` on `webBuild.wasm.unityweb` after its 200 response — the Unity loader cancels a duplicate/preload stream of that payload once instantiation starts; the scene rendered, so the wasm was read and executed.
+- Gaps seen: none.
 
 ## Boot test (2026-10-27)
 
@@ -224,6 +237,52 @@ the origin's resource bytes are identical across Accept-Encoding variants (hcdn
 adds a br/gzip transfer layer that clients strip). Refreshing means re-running the
 fetch into a clean tree and re-cutting the derived layers on top of the new capture
 (`node tools/derive.mjs`, then `node tools/audit.js`).
+
+### 2026-11-01 drift refresh (census: 2 changed / 7 missing)
+
+A 2026-11-01 census found real drift: the origin had redeployed the Nuxt build
+(new buildId `5ad685dc-c9da-484c-a7c7-41f0cab32a2d`). A quarantined-cache
+re-probe (`Cache-Control: no-cache, no-store` + `Pragma: no-cache`, `fetch`
+`cache:'no-store'`, two independent rounds) confirmed and stabilised the set:
+
+- **gone upstream (7 × 404, stable across rounds):** `_nuxt/l-4XETKm.js`,
+  `_nuxt/A3EUxX58.js`, `_nuxt/Buq_OoVt.js`, `_nuxt/c0TEtrJJ.js`,
+  `_nuxt/B9hgXP_e.js`, `_nuxt/entry.BnxCdEeO.css`,
+  `_nuxt/builds/meta/59b71471-88a1-4f73-ae77-d8743f470d65.json`
+- **replaced:** `web-demo/index.html` (now points at `DbK2IZpp.js` /
+  `entry.DtG1u2qY.css` and the five modulepreload chunks; page text identical)
+- **excluded as rotating, not drift:** `_nuxt/builds/latest.json` (id + timestamp
+  only; re-captured to stay a current pointer, excluded from the drift count)
+- **trust gate:** the 25 files that were still served unchanged were re-fetched
+  over the wire and compared byte-for-byte with the capture on disk — 25/25
+  byte-identical. (A cache-busting query string is not usable on every path: this
+  origin 404s `/favicon.ico?…` while serving `/favicon.ico`, so the trust gate
+  probes the recorded paths verbatim.)
+
+Repair: the seven gone files, the replaced entry document and the rotating pointer
+were archived under `legacy/2026-11-01/` (with `upstream-gone.json` recording the
+404 evidence and the old sha256 per path, plus the superseded derived twins); the
+nine replacement resources were re-fetched byte-exact (no normalization) and the
+capture re-cut with `node tools/record-manifest.mjs`. The replacement closure is
+five new shell chunks + the replaced stylesheet + the new build meta, with
+`bBm2T0bl.js` the one chunk that survived the deploy unchanged. The rename map was
+re-authored for the new route chunk (`tools/names.json` → `apply-names.mjs` →
+`recover-scoped-map.mjs`): the same eight names over the same component, 17
+identifier splices, 7 word-boundary + 1 indexed record.
+
+Gates on the refreshed capture: `node tools/verify.mjs` → `34 files checked,
+0 problems`; `node tools/record-manifest.mjs --check` → `34 files match the
+committed record`; `node tools/audit.js` → `AUDIT PASS` (26 spec sections — 5/5
+src↔pretty round-trips byte-exact through the recorded rename map, 13/13 pretty
+sources tiled contiguously, 6/6 whole-file reading copies re-verified, 23
+notRendered records byte-verified); `node tools/verify-rename.mjs --all` → `5/5
+slice(s) reproduce byte-exact`; `node tools/check-chunk.mjs --all` → `2 chunk(s),
+5 slice body(ies) substituted — all cross-slice calls resolve`; `node
+tools/check-exports.mjs` → `12 export table(s) checked`, no public name lost;
+`node tools/check-links.mjs` → every export table names a binding the layer
+declares (1 fragment, not a defect); `node tools/derive.mjs --check` →
+`DERIVE CHECK PASS`; `node tools/update.mjs` → `up to date: 34 captured files
+identical upstream`.
 
 ### 2026-10-13 derivation note
 

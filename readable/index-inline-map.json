@@ -17,7 +17,7 @@
       "byteStart": 211,
       "byteEnd": 254,
       "bytes": 43,
-      "sha256": "fa5878041f22a16a9026faff45be111b9374b5627a3c932df1733084d7adf0c3"
+      "sha256": "415c1a55470a44b0e8b8cbc1fa284516691bb7a4f1e7597281328fa68b836cc6"
     },
     {
       "file": "readable/web-demo/index-inline-2.pretty.js",
@@ -26,7 +26,7 @@
       "byteStart": 3433,
       "byteEnd": 3622,
       "bytes": 189,
-      "sha256": "87111c57e18ce1bcdb5474bb478da380440c50d133aacc5b5c7c505e5ba82207"
+      "sha256": "9b8cdcc9098debf2d01e47de35da801a5ca211b5ea3539098d458ba463ba352b"
     }
   ]
 }
